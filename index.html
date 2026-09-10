@@ -4,408 +4,588 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ICONS 2027 · HALL 1 · Interactive Floor Plan</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-    --sold-red:#e74c3c;
-    --vip-purple:#9b59b6;
-    --text-gray:#95a5a6;
-    --text-dark:#1f2937;
-    --font-main:'Inter',sans-serif;
-    --map-scale:1;
+    --ink:#0b1220;
+    --ink-2:#475569;
+    --ink-3:#94a3b8;
+    --line:#e8edf3;
+    --paper:#ffffff;
+    --bg:#eef1f5;
+    --sold:#e0484d;
+    --seller:#7c3aed;
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --shadow-lg:0 24px 60px -12px rgba(11,18,32,.28), 0 8px 20px -8px rgba(11,18,32,.16);
+    --shadow-md:0 10px 30px -8px rgba(11,18,32,.18), 0 3px 10px -4px rgba(11,18,32,.10);
 }
-body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f3f4f6;font-family:var(--font-main)}
-#map-wrapper{width:100vw;height:100vh;position:relative;overflow:hidden}
-#container{position:absolute;top:0;left:0;transform-origin:0 0;transition:transform .4s cubic-bezier(.25,1,.5,1);cursor:crosshair;touch-action:none;display:inline-block}
-#map-img{display:block;image-rendering:high-quality;max-width:none;user-select:none;-webkit-user-drag:none}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--font);-webkit-font-smoothing:antialiased}
 
-#capa-mesas,#capa-sponsors{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-#capa-sponsors{z-index:50}
+#stage{position:absolute;inset:0;overflow:hidden;touch-action:none}
+#container{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+#container.animate{transition:transform .34s cubic-bezier(.22,1,.36,1)}
+#map-img{display:block;max-width:none;user-select:none;-webkit-user-drag:none;image-rendering:high-quality}
+#capa-mesas,#capa-sellers{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+#capa-sellers{z-index:40}
 
-body.is-state-1 #container,body.is-state-2 #container{cursor:grab}
-body.is-state-1 #container:active,body.is-state-2 #container:active{cursor:grabbing}
+#stage{cursor:grab}
+#stage.dragging{cursor:grabbing}
 
-/* ---------- MESAS ---------- */
-.mesa{position:absolute;box-sizing:border-box;border:1.5px solid #2ecc71;background:rgba(46,204,113,.25);border-radius:2px;pointer-events:none}
-body.is-state-1 .mesa,body.is-state-2 .mesa{pointer-events:auto;cursor:pointer}
-body.is-state-1 .mesa:hover,body.is-state-2 .mesa:hover{z-index:999;border-color:#fff!important;box-shadow:0 0 15px rgba(0,0,0,.3);filter:brightness(1.35) saturate(1.2)}
-.mesa.agotada{cursor:not-allowed}
-
-/* ---------- TOOLTIP DE MESA ---------- */
-.tt{
-    position:absolute;bottom:150%;left:50%;
-    transform:translateX(-50%) translateY(10px) scale(calc(1 / var(--map-scale)));
-    transform-origin:bottom center;width:340px;background:#fff;border-radius:12px;
-    box-shadow:0 15px 40px rgba(0,0,0,.25);opacity:0;pointer-events:none;
-    transition:all .2s ease;overflow:hidden;display:flex;flex-direction:column;z-index:1000;
+/* ---------------- MESAS ---------------- */
+.mesa{
+    position:absolute;box-sizing:border-box;
+    border:1px solid rgba(0,0,0,.12);
+    border-radius:2px;
+    pointer-events:auto;cursor:pointer;
+    transition:filter .12s ease, box-shadow .12s ease;
 }
-body.is-state-1 .mesa:hover .tt,body.is-state-2 .mesa:hover .tt{opacity:1;transform:translateX(-50%) translateY(0) scale(calc(1 / var(--map-scale)))}
-.tt-row{display:flex;border-bottom:1px solid #f1f5f9}
-.tt-cell{flex:1;padding:10px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #f1f5f9}
-.tt-cell:last-child{border-right:none}
-.tt-label{color:var(--text-gray);font-size:9px;font-weight:900;text-transform:uppercase;margin-bottom:2px;letter-spacing:.05em}
-.tt-value{font-size:14px;font-weight:900;color:var(--text-dark);text-align:center;line-height:1.2}
-.tt-seller{padding:9px 12px;font-size:12px;font-weight:800;color:#475569;background:#f8fafc;text-align:center;border-bottom:1px solid #f1f5f9}
-.tt-foot{padding:11px 12px;color:#fff;text-align:center;display:flex;flex-direction:column;gap:3px}
-.tt-type{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;opacity:.92}
-.tt-price{display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:900}
-.tt-old{font-size:13px;font-weight:700;opacity:.7;text-decoration:line-through}
-.tt-eb{font-size:9px;font-weight:900;letter-spacing:.08em;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:99px;align-self:center}
-.tt-sold{font-size:15px;font-weight:900;letter-spacing:.08em}
+.mesa:hover{filter:saturate(1.5) brightness(1.08);box-shadow:0 0 0 1.5px #fff, 0 0 0 3px rgba(11,18,32,.55);z-index:30}
+.mesa.sold{cursor:default}
+.mesa.dim{opacity:.22;filter:grayscale(1)}
 
-/* ---------- SELLERS / SPONSORS ---------- */
-.sponsor-zone{position:absolute;pointer-events:none;transition:transform .2s cubic-bezier(.175,.885,.32,1.275)}
-body.is-state-1 .sponsor-zone,body.is-state-2 .sponsor-zone{pointer-events:auto}
-.sponsor-zone:hover{transform:scale(1.08);z-index:9000}
-.sponsor-logo-box{width:100%;height:100%;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;padding:5px;box-sizing:border-box;border:2px solid #fff;transition:border-color .2s}
-.sponsor-zone:hover .sponsor-logo-box{border-color:var(--vip-purple)}
+/* ---------------- SELLERS ---------------- */
+.sponsor-zone{position:absolute;pointer-events:auto;transition:transform .18s cubic-bezier(.2,.9,.3,1.2);cursor:pointer}
+.sponsor-zone:hover{transform:scale(1.07);z-index:9000}
+.sponsor-logo-box{width:100%;height:100%;background:#fff;border-radius:7px;box-shadow:0 3px 10px rgba(11,18,32,.18);display:flex;align-items:center;justify-content:center;padding:4px;border:1.5px solid #fff;transition:border-color .18s}
+.sponsor-zone:hover .sponsor-logo-box{border-color:var(--seller)}
 .sponsor-logo-box img{width:100%;height:100%;object-fit:contain}
-.sponsor-logo-box.multi-logo{display:grid;gap:4px;align-items:stretch;justify-items:stretch}
-.sponsor-logo-box.multi-logo img{width:100%;height:100%;min-width:0;min-height:0;object-fit:contain}
-.layout-dual-horizontal{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
-.layout-dual-vertical{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}
-.layout-triple-vertical{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}
-.layout-quad-vertical{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(4,minmax(0,1fr))}
+.sponsor-logo-box.multi-logo{display:grid;gap:3px;align-items:stretch;justify-items:stretch}
+.sponsor-logo-box.multi-logo img{min-width:0;min-height:0}
+.layout-dual-horizontal{grid-template-columns:repeat(2,minmax(0,1fr))}
+.layout-dual-vertical{grid-template-rows:repeat(2,minmax(0,1fr))}
+.layout-triple-vertical{grid-template-rows:repeat(3,minmax(0,1fr))}
+.layout-quad-vertical{grid-template-rows:repeat(4,minmax(0,1fr))}
 
-.sponsor-tooltip{
-    position:absolute;bottom:100%;left:50%;margin-bottom:15px;
-    transform:translateX(-50%) translateY(10px) scale(calc(1 / var(--map-scale)));
-    transform-origin:bottom center;background:#fff;border-radius:14px;
-    box-shadow:0 20px 50px rgba(0,0,0,.3);padding:18px;width:max-content;min-width:200px;
-    opacity:0;pointer-events:none;transition:all .25s ease;border-top:5px solid var(--vip-purple);
+/* ---------------- TOOLTIP (overlay fijo, tamaño constante) ---------------- */
+.tip{
+    position:fixed;z-index:12000;left:0;top:0;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    opacity:0;transform:translateY(6px) scale(.98);
+    transition:opacity .14s ease, transform .14s ease;
+    pointer-events:none;overflow:hidden;
 }
-.sponsor-tooltip::after{content:'';position:absolute;top:100%;left:-30px;right:-30px;height:50px}
-.sponsor-zone:hover .sponsor-tooltip{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(calc(1 / var(--map-scale)))}
-.sp-name{font-size:18px;font-weight:900;color:var(--text-dark);margin-bottom:14px;letter-spacing:-.02em}
-.sp-links{display:flex;flex-direction:column;gap:8px}
-.sp-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:800;transition:all .2s}
-.sp-btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1)}
-.btn-ig{background:#fdf2f8;color:#e1306c;border:1px solid #fbcfe8}
-.btn-web{background:#f8fafc;color:#334155;border:1px solid #e2e8f0}
-.sp-icon{width:18px;height:18px;object-fit:contain}
+.tip.show{opacity:1;transform:translateY(0) scale(1)}
+.tip::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent,#94a3b8)}
 
-/* ---------- UI ---------- */
-#legend{
-    position:fixed;top:22px;left:22px;background:rgba(255,255,255,.96);border-radius:14px;
-    padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:20000;backdrop-filter:blur(6px);
+#tip-mesa{width:288px}
+.t-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px 0}
+.t-id{font-size:21px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+.t-cat{font-size:10.5px;font-weight:700;color:var(--ink-3);letter-spacing:.09em;text-transform:uppercase;margin-top:6px}
+.t-pill{
+    font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:5px 9px;border-radius:999px;white-space:nowrap;flex:none;
+    background:var(--accent-soft,#f1f5f9);color:var(--accent-ink,#334155);
 }
-#legend h1{margin:0 0 3px;font-size:14px;font-weight:900;letter-spacing:-.02em;color:var(--text-dark)}
-#legend .sub{font-size:10px;font-weight:800;color:var(--text-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
-.lg-row{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#475569;padding:2px 0}
-.lg-dot{width:13px;height:13px;border-radius:3px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
-#legend .eb{margin-top:10px;font-size:9px;font-weight:900;color:#0f766e;background:#ccfbf1;padding:4px 8px;border-radius:99px;display:inline-block;letter-spacing:.05em}
+.t-meta{display:flex;gap:0;margin:13px 16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.t-cell{flex:1;padding:9px 0;text-align:center;border-right:1px solid var(--line)}
+.t-cell:last-child{border-right:none}
+.t-k{display:block;font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.t-v{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin-top:3px;font-variant-numeric:tabular-nums;line-height:1.25;padding:0 4px}
+.t-foot{padding:13px 16px 15px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.t-old{font-size:13px;font-weight:600;color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:1.5px}
+.t-new{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.t-eb{font-size:9px;font-weight:800;letter-spacing:.08em;background:#e7f8f2;color:#0f6b52;padding:4px 8px;border-radius:999px;text-transform:uppercase}
+.t-sold{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sold)}
+.t-sold::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--sold)}
+.t-seller{padding:12px 16px 0;font-size:12px;font-weight:600;color:var(--ink-2)}
+.t-seller b{color:var(--ink);font-weight:800}
 
-#side-menu{position:fixed;right:-150px;bottom:100px;transition:right .4s cubic-bezier(.175,.885,.32,1.275);z-index:20000}
-#side-menu.visible{right:30px}
-.btn-back{background:#fff;border:none;padding:12px 24px;border-radius:50px;font-family:var(--font-main);font-weight:900;font-size:13px;color:var(--text-dark);box-shadow:0 10px 25px rgba(0,0,0,.1);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
-.btn-back:hover{transform:scale(1.05);color:#27ae60}
+#tip-seller{width:auto;min-width:190px;max-width:260px;pointer-events:auto}
+#tip-seller::before{background:var(--seller)}
+.s-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.02em;padding:16px 17px 0}
+.s-tag{font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:5px 17px 0}
+.s-links{display:flex;flex-direction:column;gap:7px;padding:13px 15px 15px}
+.s-btn{display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:9px;text-decoration:none;font-size:12.5px;font-weight:700;transition:all .16s;border:1px solid var(--line);color:var(--ink-2);background:#fafbfc}
+.s-btn:hover{background:#fff;border-color:#cfd8e3;transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.s-btn svg,.s-btn img{width:16px;height:16px;object-fit:contain;flex:none}
+.s-btn.ig:hover{border-color:#f0b3d0;color:#c02a63}
 
-#zoom-ui{position:fixed;bottom:30px;right:30px;background:#fff;padding:6px;border-radius:50px;box-shadow:0 10px 30px rgba(0,0,0,.1);z-index:20000;display:flex;gap:5px}
-.zoom-btn{width:45px;height:45px;border-radius:50%;border:none;background:transparent;font-weight:900;color:var(--text-gray);cursor:pointer;transition:all .2s;font-size:14px}
-.zoom-btn:hover{background:#f1f5f9;color:var(--text-dark)}
-.zoom-btn.active{background:var(--text-dark);color:#fff}
+/* ---------------- CABECERA / LEYENDA ---------------- */
+#hud{position:fixed;top:18px;left:18px;z-index:11000;display:flex;flex-direction:column;gap:10px;max-width:280px}
+.card{background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.7);border-radius:14px;box-shadow:var(--shadow-md)}
+#brand{padding:13px 15px}
+#brand h1{margin:0;font-size:13.5px;font-weight:800;letter-spacing:-.01em;color:var(--ink)}
+#brand p{margin:4px 0 0;font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.07em;text-transform:uppercase;line-height:1.5}
+#legend{padding:12px 15px 13px}
+.lg-title{font-size:8.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.lg-row{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:11.5px;font-weight:600;color:var(--ink-2);cursor:pointer;border-radius:6px;transition:background .12s}
+.lg-row:hover{background:#f4f7fa}
+.lg-row.off{opacity:.4}
+.lg-sw{width:13px;height:13px;border-radius:4px;flex:none;box-shadow:inset 0 0 0 1px rgba(11,18,32,.12)}
+.lg-row b{color:var(--ink);font-weight:800;margin-left:auto;font-variant-numeric:tabular-nums;font-size:11px}
+.lg-eb{margin-top:10px;font-size:8.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#0f6b52;background:#e7f8f2;padding:5px 9px;border-radius:999px;display:inline-block}
+.lg-hint{margin-top:9px;font-size:9.5px;color:var(--ink-3);font-weight:600;line-height:1.5}
 
-#loupe{position:fixed;width:260px;height:260px;border-radius:50%;border:4px solid #fff;box-shadow:0 15px 35px rgba(0,0,0,.3);pointer-events:none;overflow:hidden;z-index:15000;opacity:0;display:none;background:#fff;left:0;top:0;will-change:transform}
-#loupe.visible{opacity:1;display:block}
-#loupe-inner{position:absolute;transform-origin:0 0;pointer-events:none;will-change:transform}
-#loupe .tt,#loupe .sponsor-tooltip{display:none!important}
+/* ---------------- ZOOM ---------------- */
+#zoom{position:fixed;right:20px;bottom:20px;z-index:11000;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.7);border-radius:999px;box-shadow:var(--shadow-md)}
+.zbtn{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--ink-2);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .14s,color .14s;font-family:var(--font);line-height:1}
+.zbtn:hover{background:#eef2f6;color:var(--ink)}
+.zbtn:active{background:#e2e8f0}
+#z-track{height:158px;width:32px;display:flex;align-items:center;justify-content:center;position:relative}
+#z-range{
+    -webkit-appearance:none;appearance:none;
+    width:150px;height:4px;border-radius:99px;background:#dde4ec;outline:none;
+    transform:rotate(-90deg);cursor:pointer;
+}
+#z-range::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);cursor:grab;box-shadow:0 1px 4px rgba(11,18,32,.3)}
+#z-range::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.12)}
+#z-range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);cursor:grab;box-shadow:0 1px 4px rgba(11,18,32,.3)}
+#z-pct{font-size:9.5px;font-weight:800;color:var(--ink-3);font-variant-numeric:tabular-nums;letter-spacing:.02em;min-width:34px;text-align:center}
+#z-fit{width:32px;height:32px;border-radius:50%;border:none;background:var(--ink);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .14s}
+#z-fit:hover{transform:scale(1.08)}
+
+#search{position:fixed;top:18px;right:20px;z-index:11000;display:flex;align-items:center;gap:8px;padding:9px 13px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.7);border-radius:999px;box-shadow:var(--shadow-md)}
+#search svg{width:15px;height:15px;color:var(--ink-3);flex:none}
+#search input{border:none;outline:none;background:transparent;font-family:var(--font);font-size:12.5px;font-weight:600;color:var(--ink);width:132px}
+#search input::placeholder{color:var(--ink-3);font-weight:600}
+#search-count{font-size:9.5px;font-weight:800;color:var(--ink-3);font-variant-numeric:tabular-nums;min-width:16px;text-align:right}
+
+#loader{position:fixed;inset:0;z-index:30000;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .4s;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+#loader.gone{opacity:0;pointer-events:none}
+.spin{width:26px;height:26px;border:2.5px solid #dde4ec;border-top-color:var(--ink);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 
 @media(max-width:768px){
-    #side-menu{display:none}
-    #zoom-ui{right:50%;transform:translateX(50%);bottom:25px}
-    .tt{width:300px}
-    #loupe{display:none!important}
-    #legend{top:12px;left:12px;padding:10px 12px}
-    #legend h1{font-size:12px}
+    #hud{top:10px;left:10px;max-width:calc(100vw - 20px)}
+    #brand{padding:10px 12px}
+    #legend{padding:10px 12px}
+    #search{top:auto;bottom:18px;left:10px;right:auto;padding:8px 11px}
+    #search input{width:104px}
+    #zoom{right:10px;bottom:14px;padding:7px 6px;gap:4px}
+    #z-track{height:104px}
+    #z-range{width:96px}
+    #tip-mesa{width:248px}
 }
 </style>
 </head>
-<body class="is-state-0">
+<body>
 
-<div id="map-wrapper">
+<div id="loader"><div class="spin"></div><span>Loading floor plan</span></div>
+
+<div id="stage">
     <div id="container">
         <img id="map-img" alt="Hall 1 Floor Plan">
         <div id="capa-mesas"></div>
-        <div id="capa-sponsors"></div>
+        <div id="capa-sellers"></div>
     </div>
 </div>
 
-<div id="loupe"><div id="loupe-inner"></div></div>
-
-<div id="legend">
-    <h1 id="lg-title">ICONS 2027 · HALL 1</h1>
-    <div class="sub" id="lg-sub"></div>
-    <div id="lg-rows"></div>
-    <div class="eb" id="lg-eb"></div>
+<div id="hud">
+    <div class="card" id="brand">
+        <h1 id="hud-title">ICONS 2027 · HALL 1</h1>
+        <p id="hud-sub"></p>
+    </div>
+    <div class="card" id="legend">
+        <div class="lg-title">Tables</div>
+        <div id="lg-rows"></div>
+        <div id="lg-eb" class="lg-eb"></div>
+        <div class="lg-hint">Click a row to filter · scroll or drag the slider to zoom</div>
+    </div>
 </div>
 
-<div id="side-menu">
-    <button class="btn-back" onclick="setZoomStateUI(0,event)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        BACK
+<div id="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="search-input" type="text" placeholder="Find a table…" autocomplete="off" spellcheck="false">
+    <span id="search-count"></span>
+</div>
+
+<div id="zoom">
+    <button class="zbtn" id="z-in" title="Zoom in">+</button>
+    <div id="z-track"><input id="z-range" type="range" min="0" max="1000" value="0"></div>
+    <button class="zbtn" id="z-out" title="Zoom out">−</button>
+    <div id="z-pct">100%</div>
+    <button id="z-fit" title="Fit to screen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>
     </button>
 </div>
 
-<div id="zoom-ui">
-    <button class="zoom-btn active" onclick="setZoomStateUI(0,event)">x1</button>
-    <button class="zoom-btn" onclick="setZoomStateUI(1,event)">x2</button>
-    <button class="zoom-btn" onclick="setZoomStateUI(2,event)">x3</button>
-</div>
+<div class="tip" id="tip-mesa"></div>
+<div class="tip" id="tip-seller"></div>
 
 <script src="config.js"></script>
 <script>
 const C = window.ICONS_CONFIG;
-const dictionaryMesas = new Map();
+const dict = new Map();
 
-document.getElementById('map-img').src = C.mapImage;
-document.getElementById('lg-title').textContent = 'ICONS 2027 · ' + C.hallName;
-document.getElementById('lg-sub').textContent = C.categories.map(c => c.label).join(' · ');
+const stage      = document.getElementById('stage');
+const container  = document.getElementById('container');
+const mapImg     = document.getElementById('map-img');
+const capaMesas  = document.getElementById('capa-mesas');
+const capaSell   = document.getElementById('capa-sellers');
+const tipMesa    = document.getElementById('tip-mesa');
+const tipSeller  = document.getElementById('tip-seller');
 
-/* Leyenda generada desde config.js */
-(function legend(){
-    const rows = document.getElementById('lg-rows');
-    Object.keys(C.types).forEach(k => {
-        const p = C.priceFor(k);
-        const col = C.colorFor(k, 'base', '');
-        rows.insertAdjacentHTML('beforeend',
-            `<div class="lg-row"><span class="lg-dot" style="background:${C.rgba(col,.55)};border-color:${C.shade(col,.28)}"></span>
-             ${C.types[k].label} · ${p.early ? p.early : p.base}</div>`);
-    });
-    rows.insertAdjacentHTML('beforeend',
-        `<div class="lg-row"><span class="lg-dot" style="background:${C.rgba(C.soldColor,.55)};border-color:${C.shade(C.soldColor,.28)}"></span>${C.soldLabel}</div>`);
-    const eb = document.getElementById('lg-eb');
-    if (C.earlyBird.active) eb.textContent = C.earlyBird.label; else eb.style.display = 'none';
-})();
+mapImg.src = C.mapImage;
+document.getElementById('hud-title').textContent = 'ICONS 2027 · ' + C.hallName;
+document.getElementById('hud-sub').textContent = C.categories.map(c => c.label).join(' · ');
 
-/* ---------- MESAS ---------- */
+/* ============================ ZOOM ============================ */
+const ZMAX = 16;            // 16 × la vista completa
+let fitScale = 1, zoom = 1, tx = 0, ty = 0;
+let dragging = false, moved = false, sx = 0, sy = 0, ox = 0, oy = 0;
+
+const zRange = document.getElementById('z-range');
+const zPct   = document.getElementById('z-pct');
+
+function scale(){ return fitScale * zoom; }
+function zoomToSlider(z){ return Math.round(1000 * Math.log(z) / Math.log(ZMAX)); }
+function sliderToZoom(v){ return Math.pow(ZMAX, v / 1000); }
+
+function applyTransform(animate){
+    container.classList.toggle('animate', !!animate);
+    container.style.transform = `translate3d(${tx}px,${ty}px,0) scale(${scale()})`;
+    zPct.textContent = Math.round(zoom * 100) + '%';
+    zRange.value = zoomToSlider(zoom);
+}
+
+function clampPan(){
+    const w = mapImg.naturalWidth * scale();
+    const h = mapImg.naturalHeight * scale();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const g = gutters();
+    if (w <= vw - g.l - g.r) tx = g.l + (vw - g.l - g.r - w) / 2;
+    else tx = Math.min(0, Math.max(vw - w, tx));
+    if (h <= vh - g.t - g.b) ty = g.t + (vh - g.t - g.b - h) / 2;
+    else ty = Math.min(0, Math.max(vh - h, ty));
+}
+
+function setZoom(z, cx, cy, animate){
+    const nz = Math.min(ZMAX, Math.max(1, z));
+    if (cx === undefined){ cx = window.innerWidth / 2; cy = window.innerHeight / 2; }
+    const before = scale();
+    const px = (cx - tx) / before, py = (cy - ty) / before;
+    zoom = nz;
+    const after = scale();
+    tx = cx - px * after;
+    ty = cy - py * after;
+    clampPan();
+    applyTransform(animate);
+    hideTips();
+}
+
+/* hueco reservado para el panel izquierdo y la barra de zoom */
+function gutters(){
+    const wide = window.innerWidth >= 1080;
+    return { l: wide ? 312 : 0, r: wide ? 76 : 0, t: 0, b: wide ? 0 : 74 };
+}
+function fit(animate){
+    const iw = mapImg.naturalWidth || 7499, ih = mapImg.naturalHeight || 5675;
+    const g = gutters();
+    const availW = window.innerWidth - g.l - g.r;
+    const availH = window.innerHeight - g.t - g.b;
+    fitScale = Math.min(availW / iw, availH / ih) * 0.97;
+    zoom = 1;
+    tx = g.l + (availW - iw * fitScale) / 2;
+    ty = g.t + (availH - ih * fitScale) / 2;
+    applyTransform(animate);
+}
+
+zRange.addEventListener('input', () => setZoom(sliderToZoom(+zRange.value)));
+document.getElementById('z-in').onclick  = () => setZoom(zoom * 1.45, undefined, undefined, true);
+document.getElementById('z-out').onclick = () => setZoom(zoom / 1.45, undefined, undefined, true);
+document.getElementById('z-fit').onclick = () => { fit(true); hideTips(); };
+
+stage.addEventListener('wheel', e => {
+    e.preventDefault();
+    setZoom(zoom * (e.deltaY > 0 ? 0.86 : 1.16), e.clientX, e.clientY);
+}, { passive:false });
+
+stage.addEventListener('dblclick', e => {
+    if (e.target.closest('.sponsor-zone')) return;
+    setZoom(zoom < ZMAX * 0.5 ? zoom * 2.2 : 1, e.clientX, e.clientY, true);
+});
+
+/* --- arrastre --- */
+stage.addEventListener('pointerdown', e => {
+    if (e.target.closest('#tip-seller')) return;
+    dragging = true; moved = false;
+    sx = e.clientX; sy = e.clientY; ox = tx; oy = ty;
+    stage.classList.add('dragging');
+    container.classList.remove('animate');
+    stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) + Math.abs(dy) > 4){ moved = true; hideTips(); }
+    tx = ox + dx; ty = oy + dy;
+    clampPan();
+    applyTransform(false);
+});
+stage.addEventListener('pointerup', e => {
+    dragging = false; stage.classList.remove('dragging');
+    try { stage.releasePointerCapture(e.pointerId); } catch(_){}
+});
+stage.addEventListener('pointercancel', () => { dragging = false; stage.classList.remove('dragging'); });
+
+/* --- pinch en móvil --- */
+let pinch = null;
+stage.addEventListener('touchstart', e => {
+    if (e.touches.length === 2){
+        dragging = false;
+        const [a,b] = e.touches;
+        pinch = { d: Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY), z: zoom,
+                  cx:(a.clientX+b.clientX)/2, cy:(a.clientY+b.clientY)/2 };
+        hideTips();
+    }
+}, { passive:true });
+stage.addEventListener('touchmove', e => {
+    if (pinch && e.touches.length === 2){
+        e.preventDefault();
+        const [a,b] = e.touches;
+        const d = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+        setZoom(pinch.z * (d / pinch.d), pinch.cx, pinch.cy);
+    }
+}, { passive:false });
+stage.addEventListener('touchend', e => { if (e.touches.length < 2) pinch = null; }, { passive:true });
+
+window.addEventListener('keydown', e => {
+    if (document.activeElement === document.getElementById('search-input')) return;
+    if (e.key === '+' || e.key === '=') setZoom(zoom*1.45, undefined, undefined, true);
+    if (e.key === '-' || e.key === '_') setZoom(zoom/1.45, undefined, undefined, true);
+    if (e.key === '0') fit(true);
+    if (e.key === 'Escape') hideTips();
+});
+window.addEventListener('resize', () => { const z = zoom; fit(false); setZoom(z); });
+
+/* ============================ TOOLTIPS ============================ */
+let tipTimer = null;
+function hideTips(){
+    tipMesa.classList.remove('show');
+    tipSeller.classList.remove('show');
+}
+function place(tip, rect){
+    tip.style.visibility = 'hidden';
+    tip.classList.add('show');
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    const gap = 12;
+    let left = rect.left + rect.width/2 - w/2;
+    let top  = rect.top - h - gap;
+    if (top < 12) top = rect.bottom + gap;
+    if (top + h > window.innerHeight - 12) top = Math.max(12, window.innerHeight - h - 12);
+    left = Math.min(window.innerWidth - w - 12, Math.max(12, left));
+    tip.style.left = left + 'px';
+    tip.style.top  = top + 'px';
+    tip.style.visibility = 'visible';
+}
+
+/* ============================ MESAS ============================ */
+function mesaTip(m){
+    const info  = m.dataset.info || '';
+    const type  = m.dataset.type || 'collector';
+    const p     = C.parseId(info);
+    const price = C.priceFor(type);
+    const conf  = C.types[type] || C.types.collector;
+    const hex   = m._hex;
+    const sold  = m.classList.contains('sold');
+    const seller= m.dataset.seller || '';
+    const label = `${p.zone}${p.num}`;
+
+    tipMesa.style.setProperty('--accent', sold ? C.soldColor : hex);
+    tipMesa.style.setProperty('--accent-soft', C.rgba(sold ? C.soldColor : hex, .13));
+    tipMesa.style.setProperty('--accent-ink', C.shade(sold ? C.soldColor : hex, .42));
+
+    tipMesa.innerHTML = `
+        <div class="t-head">
+            <div class="t-id">${label}</div>
+            <span class="t-pill">${sold ? C.soldLabel : conf.label.replace(' Table','')}</span>
+        </div>
+        <div class="t-meta">
+            <div class="t-cell"><span class="t-k">Category</span><span class="t-v">${p.catLabel}</span></div>
+            <div class="t-cell"><span class="t-k">Zone</span><span class="t-v">${p.zone}</span></div>
+            <div class="t-cell"><span class="t-k">Table</span><span class="t-v">${p.num}</span></div>
+        </div>
+        ${seller ? `<div class="t-seller">Exhibitor · <b>${seller}</b></div>` : ''}
+        <div class="t-foot">
+            ${sold
+                ? `<span class="t-sold">${C.soldLabel}</span>`
+                : (price.early
+                    ? `<span class="t-old">${price.base}</span><span class="t-new">${price.early}</span><span class="t-eb">${C.earlyBird.label}</span>`
+                    : `<span class="t-new">${price.base}</span>`)}
+        </div>`;
+    place(tipMesa, m.getBoundingClientRect());
+}
+
 async function cargarMesas(){
-    try{
-        const resp = await fetch('mesas.html?v=' + Date.now(), {cache:'no-store'});
-        const html = await resp.text();
-        document.getElementById('capa-mesas').innerHTML = html;
+    const resp = await fetch('mesas.html?v=' + Date.now(), { cache:'no-store' });
+    capaMesas.innerHTML = await resp.text();
 
-        document.querySelectorAll('.mesa').forEach(m => {
-            const info = m.dataset.info || '';
-            dictionaryMesas.set(info, m);
-
-            /* Tipo: primero el data-type del builder; si no existe, se deduce del ID */
-            const type = m.dataset.type || (/COMMERCIAL/i.test(info) ? 'commercial' : 'collector');
-            const tone = m.dataset.tone || 'base';
-            m.dataset.type = type;
-
-            const hex = C.colorFor(type, tone, m.dataset.color || '');
-            m.style.backgroundColor = C.rgba(hex, .30);
-            m.style.borderColor = C.shade(hex, .25);
-            m._hex = hex;
-
-            const p = C.parseId(info);
-            const price = C.priceFor(type);
-            const typeLabel = (C.types[type] || C.types.collector).label;
-
-            m.innerHTML = `
-                <div class="tt">
-                    <div class="tt-row">
-                        <div class="tt-cell"><span class="tt-label">Category</span><span class="tt-value">${p.catLabel}</span></div>
-                        <div class="tt-cell"><span class="tt-label">Zone</span><span class="tt-value">${p.zone}</span></div>
-                        <div class="tt-cell"><span class="tt-label">Table</span><span class="tt-value">${p.num}</span></div>
-                    </div>
-                    <div class="tt-seller" data-seller style="display:none"></div>
-                    <div class="tt-foot" style="background:${C.shade(hex,.18)}">
-                        <span class="tt-type">${typeLabel}</span>
-                        <span class="tt-price">
-                            ${price.early ? `<span class="tt-old">${price.base}</span><span>${price.early}</span>`
-                                          : `<span>${price.base}</span>`}
-                        </span>
-                        ${price.early ? `<span class="tt-eb">${C.earlyBird.label}</span>` : ''}
-                    </div>
-                </div>`;
-        });
-        await sincronizarConExcel();
-    }catch(e){ console.error('Error loading tables:', e); }
+    capaMesas.querySelectorAll('.mesa').forEach(m => {
+        const info = m.dataset.info || '';
+        dict.set(info, m);
+        const type = m.dataset.type || (/COMMERCIAL/i.test(info) ? 'commercial' : 'collector');
+        const tone = m.dataset.tone || 'base';
+        m.dataset.type = type;
+        const hex = C.colorFor(type, tone, m.dataset.color || '');
+        m._hex = hex;
+        paint(m);
+        m.addEventListener('pointerenter', () => { if (!dragging) mesaTip(m); });
+        m.addEventListener('pointerleave', () => tipMesa.classList.remove('show'));
+    });
+}
+function paint(m){
+    const sold = m.classList.contains('sold');
+    const hex = sold ? C.soldColor : m._hex;
+    m.style.backgroundColor = C.rgba(hex, sold ? .46 : .34);
+    m.style.borderColor = C.rgba(C.shade(hex,.3), .75);
 }
 
-/* ---------- SELLERS ---------- */
-async function cargarSponsors(){
-    try{
-        const resp = await fetch('seller.html?v=' + Date.now(), {cache:'no-store'});
-        if (!resp.ok) return;
-        const html = await resp.text();
-        document.getElementById('capa-sponsors').innerHTML = html;
+/* ============================ SELLERS ============================ */
+const IG_ICON = 'https://cdn.shopify.com/s/files/1/0772/3633/9020/files/Instagram_icon_a7c6e898-1b4b-42cf-a525-04f05aea43a2.png?v=1778103647';
+const WEB_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/></svg>';
 
-        const igIcon = 'https://cdn.shopify.com/s/files/1/0772/3633/9020/files/Instagram_icon_a7c6e898-1b4b-42cf-a525-04f05aea43a2.png?v=1778103647';
-        const webIcon = '<svg class="sp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
-
-        document.querySelectorAll('.sponsor-zone').forEach(sp => {
-            const name = sp.dataset.name || '';
-            const logo = sp.dataset.logo || '';
-            const ig = sp.dataset.ig || '';
-            const web = sp.dataset.web || '';
-            const legacyDual = sp.dataset.dual === 'true';
-            const requested = sp.dataset.logoLayout || (legacyDual ? 'dual-vertical' : 'single');
-            const valid = new Set(['single','dual-horizontal','dual-vertical','triple-vertical','quad-vertical']);
-            const layout = valid.has(requested) ? requested : 'single';
-            const counts = {'single':1,'dual-horizontal':2,'dual-vertical':2,'triple-vertical':3,'quad-vertical':4};
-            const n = counts[layout];
-            const boxClass = layout === 'single' ? 'sponsor-logo-box' : `sponsor-logo-box multi-logo layout-${layout}`;
-            const logoHTML = Array.from({length:n}, () => `<img src="${logo}" alt="${name}">`).join('');
-
-            sp.innerHTML = `
-                <div class="${boxClass}">
-                    ${logo ? logoHTML : `<span style="color:#333;font-size:10px;font-weight:900">${name}</span>`}
-                </div>
-                <div class="sponsor-tooltip">
-                    <div class="sp-name">${name}</div>
-                    <div class="sp-links">
-                        ${ig ? `<a href="${ig}" target="_blank" rel="noopener" class="sp-btn btn-ig"><img src="${igIcon}" class="sp-icon"> Instagram</a>` : ''}
-                        ${web ? `<a href="${web}" target="_blank" rel="noopener" class="sp-btn btn-web">${webIcon} Visit Website</a>` : ''}
-                    </div>
-                </div>`;
-        });
-        syncLoupe();
-    }catch(e){ console.error('Error loading sellers:', e); }
+function sellerTip(sp){
+    const name = sp.dataset.name || '';
+    const ig = sp.dataset.ig || '', web = sp.dataset.web || '';
+    tipSeller.innerHTML = `
+        <div class="s-tag">Exhibitor</div>
+        <div class="s-name">${name}</div>
+        <div class="s-links">
+            ${ig  ? `<a class="s-btn ig" href="${ig}" target="_blank" rel="noopener"><img src="${IG_ICON}" alt=""> Instagram</a>` : ''}
+            ${web ? `<a class="s-btn" href="${web}" target="_blank" rel="noopener">${WEB_ICON} Visit website</a>` : ''}
+        </div>`;
+    place(tipSeller, sp.getBoundingClientRect());
 }
 
-/* ---------- HOJA DE CÁLCULO ---------- */
-function splitCSVLine(line){
+async function cargarSellers(){
+    const resp = await fetch('seller.html?v=' + Date.now(), { cache:'no-store' });
+    if (!resp.ok) return;
+    capaSell.innerHTML = await resp.text();
+    capaSell.querySelectorAll('.sponsor-zone').forEach(sp => {
+        const name = sp.dataset.name || '', logo = sp.dataset.logo || '';
+        const legacy = sp.dataset.dual === 'true';
+        const req = sp.dataset.logoLayout || (legacy ? 'dual-vertical' : 'single');
+        const counts = {'single':1,'dual-horizontal':2,'dual-vertical':2,'triple-vertical':3,'quad-vertical':4};
+        const layout = counts[req] ? req : 'single';
+        const cls = layout === 'single' ? 'sponsor-logo-box' : `sponsor-logo-box multi-logo layout-${layout}`;
+        sp.innerHTML = `<div class="${cls}">${
+            logo ? Array.from({length:counts[layout]}, () => `<img src="${logo}" alt="${name}">`).join('')
+                 : `<span style="font-size:9px;font-weight:800;color:#334155">${name}</span>`}</div>`;
+        sp.addEventListener('pointerenter', () => { clearTimeout(tipTimer); if (!dragging) sellerTip(sp); });
+        sp.addEventListener('pointerleave', () => { tipTimer = setTimeout(() => tipSeller.classList.remove('show'), 260); });
+    });
+    tipSeller.addEventListener('pointerenter', () => clearTimeout(tipTimer));
+    tipSeller.addEventListener('pointerleave', () => tipSeller.classList.remove('show'));
+}
+
+/* ============================ HOJA DE CÁLCULO ============================ */
+function splitCSV(line){
     return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
 }
-async function sincronizarConExcel(){
-    if (!C.csvUrl) return;
+async function sincronizar(){
+    if (!C.csvUrl) { updateLegend(); return; }
     try{
-        const resp = await fetch(C.csvUrl + '&cache_ignore=' + Date.now(), {method:'GET', mode:'cors', cache:'no-cache'});
-        const rows = (await resp.text()).split(/\r?\n/);
-        rows.forEach((row, i) => {
+        const r = await fetch(C.csvUrl + '&cache_ignore=' + Date.now(), { cache:'no-cache', mode:'cors' });
+        const lines = (await r.text()).split(/\r?\n/);
+        const seen = new Set();
+        lines.forEach((row,i) => {
             if (i === 0 || !row.trim()) return;
-            const col = splitCSVLine(row);
+            const col = splitCSV(row);
             if (col.length < 3) return;
-            const estado = (col[1] || '').toUpperCase();
-            const id = col[2] || '';
-            const sellerName = col[3] || '';
-            const m = dictionaryMesas.get(id);
+            const estado = (col[1]||'').toUpperCase();
+            const id = col[2]||'';
+            const m = dict.get(id);
             if (!m) return;
-
-            const foot = m.querySelector('.tt-foot');
-            const sellerBox = m.querySelector('[data-seller]');
+            seen.add(id);
             const sold = estado.includes('VENDIDA') || estado.includes('SOLD');
-
-            if (sold){
-                m.classList.add('agotada');
-                m.style.backgroundColor = C.rgba(C.soldColor, .38);
-                m.style.borderColor = C.shade(C.soldColor, .2);
-                if (foot){
-                    foot.style.background = C.shade(C.soldColor, .12);
-                    foot.innerHTML = `<span class="tt-sold">${C.soldLabel}</span>`;
-                }
-            } else {
-                m.classList.remove('agotada');
-                m.style.backgroundColor = C.rgba(m._hex, .30);
-                m.style.borderColor = C.shade(m._hex, .25);
-            }
-            if (sellerBox && sellerName){
-                sellerBox.textContent = sellerName;
-                sellerBox.style.display = 'block';
-            }
+            m.classList.toggle('sold', sold);
+            if (col[3]) m.dataset.seller = col[3];
+            paint(m);
         });
-        syncLoupe();
-    }catch(err){ console.error('Sync error:', err); }
+        dict.forEach((m,id) => { if (!seen.has(id) && m.classList.contains('sold')){ m.classList.remove('sold'); paint(m); } });
+    }catch(err){ console.warn('CSV sync:', err.message); }
+    updateLegend();
 }
 
-/* ---------- ZOOM & NAVEGACIÓN ---------- */
-const container = document.getElementById('container');
-const mapImg = document.getElementById('map-img');
-let currentZoomState = 0, baseScale = 1, currentScale = 1, currentX = 0, currentY = 0;
-let isDragging = false, startX, startY, initialX, initialY;
+/* ============================ LEYENDA + FILTRO ============================ */
+const hidden = new Set();
+function updateLegend(){
+    const rows = document.getElementById('lg-rows');
+    const all = Array.from(dict.values());
+    const counts = {};
+    Object.keys(C.types).forEach(k => counts[k] = all.filter(m => m.dataset.type === k && !m.classList.contains('sold')).length);
+    const soldN = all.filter(m => m.classList.contains('sold')).length;
 
-function initMapPosition(){
-    if (mapImg.naturalWidth === 0){ setTimeout(initMapPosition, 100); return; }
-    const sx = window.innerWidth / mapImg.naturalWidth;
-    const sy = window.innerHeight / mapImg.naturalHeight;
-    baseScale = Math.min(sx, sy) * 0.98;
-    if (baseScale > 1) baseScale = 1;
-    setZoomState(0, null, null, true);
-}
-window.onload = () => {
-    if (mapImg.complete) initMapPosition(); else mapImg.onload = initMapPosition;
-    cargarMesas(); cargarSponsors();
-};
+    const items = Object.keys(C.types).map(k => {
+        const col = C.colorFor(k,'base','');
+        const p = C.priceFor(k);
+        return { key:k, label:C.types[k].label.replace(' Table',''), sw:C.rgba(col,.40),
+                 note:(p.early || p.base), n:counts[k] };
+    });
+    items.push({ key:'sold', label:C.soldLabel, sw:C.rgba(C.soldColor,.46), note:'', n:soldN });
 
-function setZoomState(state, cx = null, cy = null, instant = false){
-    currentZoomState = state;
-    let mult = 1;
-    if (state === 1) mult = window.innerWidth < 768 ? 3.0 : 2.5;
-    if (state === 2) mult = window.innerWidth < 768 ? 7.0 : 6.0;
-    const newScale = baseScale * mult;
-    document.documentElement.style.setProperty('--map-scale', newScale);
-    document.querySelectorAll('.zoom-btn').forEach((b,i) => b.classList.toggle('active', i === state));
-    document.body.className = 'is-state-' + state;
-    container.style.transition = instant ? 'none' : 'transform .4s cubic-bezier(.25,1,.5,1)';
-    if (state === 0){
-        currentScale = baseScale;
-        currentX = (window.innerWidth - mapImg.naturalWidth * baseScale) / 2;
-        currentY = (window.innerHeight - mapImg.naturalHeight * baseScale) / 2;
-        container.style.transform = `translate(${currentX}px,${currentY}px) scale(${currentScale})`;
-        document.getElementById('side-menu').classList.remove('visible');
-        document.querySelectorAll('.tt,.sponsor-tooltip').forEach(t => {
-            t.style.opacity = '0'; t.style.pointerEvents = 'none';
-            setTimeout(() => { t.style.opacity = ''; t.style.pointerEvents = ''; }, 300);
-        });
-    } else {
-        document.getElementById('side-menu').classList.add('visible');
-        const centerX = window.innerWidth/2, centerY = window.innerHeight/2;
-        const ux = ((cx !== null ? cx : centerX) - currentX) / currentScale;
-        const uy = ((cy !== null ? cy : centerY) - currentY) / currentScale;
-        currentX = centerX - ux * newScale;
-        currentY = centerY - uy * newScale;
-        currentScale = newScale;
-        container.style.transform = `translate(${currentX}px,${currentY}px) scale(${currentScale})`;
-    }
+    rows.innerHTML = items.map(it => `
+        <div class="lg-row ${hidden.has(it.key)?'off':''}" data-key="${it.key}">
+            <span class="lg-sw" style="background:${it.sw}"></span>
+            <span>${it.label}${it.note ? ' · ' + it.note : ''}</span>
+            <b>${it.n}</b>
+        </div>`).join('');
+    rows.querySelectorAll('.lg-row').forEach(r => r.onclick = () => toggleFilter(r.dataset.key));
+
+    const eb = document.getElementById('lg-eb');
+    if (C.earlyBird.active) eb.textContent = C.earlyBird.label; else eb.style.display = 'none';
 }
-container.addEventListener('click', e => {
-    if (e.target.closest('a') || isDragging) return;
-    let next = currentZoomState + 1;
-    if (next > 2) next = 0;
-    setZoomState(next, e.clientX, e.clientY);
+function toggleFilter(key){
+    hidden.has(key) ? hidden.delete(key) : hidden.add(key);
+    dict.forEach(m => {
+        const k = m.classList.contains('sold') ? 'sold' : m.dataset.type;
+        m.classList.toggle('dim', hidden.has(k));
+    });
+    updateLegend();
+}
+
+/* ============================ BUSCADOR ============================ */
+const input = document.getElementById('search-input');
+const scount = document.getElementById('search-count');
+input.addEventListener('input', () => {
+    const q = input.value.trim().toUpperCase().replace(/\s+/g,'');
+    if (!q){ dict.forEach(m => m.classList.remove('dim')); scount.textContent=''; return; }
+    let hits = [];
+    dict.forEach((m,id) => {
+        const p = C.parseId(id);
+        const match = id.replace(/-/g,'').includes(q) || (p.zone + p.num) === q || p.zone === q;
+        m.classList.toggle('dim', !match);
+        if (match) hits.push(m);
+    });
+    scount.textContent = hits.length || '0';
+    if (hits.length && hits.length <= 24) frame(hits);
 });
-window.setZoomStateUI = function(state, event){
-    if (event) event.stopPropagation();
-    document.getElementById('loupe').classList.remove('visible');
-    setZoomState(state, null, null);
-};
+input.addEventListener('keydown', e => { if (e.key === 'Escape'){ input.value=''; input.dispatchEvent(new Event('input')); input.blur(); } });
 
-function startDrag(x,y){ if (currentZoomState === 0) return; isDragging = true; startX=x; startY=y; initialX=currentX; initialY=currentY; container.style.transition='none'; }
-function doDrag(x,y){ if(!isDragging) return; currentX = initialX + (x-startX); currentY = initialY + (y-startY); container.style.transform = `translate(${currentX}px,${currentY}px) scale(${currentScale})`; }
-function endDrag(){ if(!isDragging) return; setTimeout(()=>isDragging=false,50); container.style.transition='transform .4s cubic-bezier(.25,1,.5,1)'; }
+function frame(list){
+    let l=1e9,t=1e9,r=-1e9,b=-1e9;
+    list.forEach(m => {
+        const L=parseFloat(m.style.left), T=parseFloat(m.style.top);
+        l=Math.min(l,L); t=Math.min(t,T);
+        r=Math.max(r,L+parseFloat(m.style.width)); b=Math.max(b,T+parseFloat(m.style.height));
+    });
+    const iw = mapImg.naturalWidth, ih = mapImg.naturalHeight;
+    const pw = (r-l)/100*iw, ph = (b-t)/100*ih;
+    const target = Math.min(ZMAX, Math.max(1.6,
+        Math.min(window.innerWidth*0.5/(pw*fitScale), window.innerHeight*0.5/(ph*fitScale))));
+    zoom = target;
+    const s = scale();
+    tx = window.innerWidth/2  - ((l+ (r-l)/2)/100*iw)*s;
+    ty = window.innerHeight/2 - ((t+ (b-t)/2)/100*ih)*s;
+    clampPan(); applyTransform(true);
+}
 
-container.addEventListener('mousedown', e => { if (e.target.closest('.sponsor-tooltip')) return; startDrag(e.clientX,e.clientY); });
-window.addEventListener('mousemove', e => doDrag(e.clientX,e.clientY));
-window.addEventListener('mouseup', endDrag);
-container.addEventListener('touchstart', e => { if (e.target.closest('.sponsor-tooltip')) return; startDrag(e.touches[0].clientX,e.touches[0].clientY); });
-window.addEventListener('touchmove', e => { if (currentZoomState > 0) e.preventDefault(); doDrag(e.touches[0].clientX,e.touches[0].clientY); }, {passive:false});
-window.addEventListener('touchend', endDrag);
-
-/* ---------- LUPA ---------- */
-const loupe = document.getElementById('loupe'), loupeInner = document.getElementById('loupe-inner');
-const loupeSize = 260, loupeMultiplier = 1.6;
-function syncLoupe(){ loupeInner.innerHTML = container.innerHTML; }
-window.addEventListener('pointermove', e => {
-    if (e.target.closest('.sponsor-zone') || window.innerWidth < 768 || e.pointerType === 'touch' || currentZoomState > 0 || isDragging){
-        loupe.classList.remove('visible'); return;
-    }
-    const rect = container.getBoundingClientRect();
-    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom){
-        loupe.classList.remove('visible'); return;
-    }
-    loupe.classList.add('visible');
-    loupe.style.transform = `translate(${e.clientX - loupeSize/2}px,${e.clientY - loupeSize/2}px)`;
-    loupeInner.style.width = mapImg.naturalWidth + 'px';
-    loupeInner.style.height = mapImg.naturalHeight + 'px';
-    const tz = baseScale * loupeMultiplier;
-    const tx = (loupeSize/2) - ((e.clientX - currentX)/baseScale * tz);
-    const ty = (loupeSize/2) - ((e.clientY - currentY)/baseScale * tz);
-    loupeInner.style.transform = `translate(${tx}px,${ty}px) scale(${tz})`;
-});
-
-setInterval(sincronizarConExcel, C.csvRefreshMs);
+/* ============================ ARRANQUE ============================ */
+async function boot(){
+    fit(false);
+    try { await cargarMesas(); } catch(e){ console.error('mesas.html:', e); }
+    try { await cargarSellers(); } catch(e){ console.warn('seller.html:', e); }
+    updateLegend();
+    sincronizar();
+    setInterval(sincronizar, C.csvRefreshMs);
+    document.getElementById('loader').classList.add('gone');
+}
+if (mapImg.complete && mapImg.naturalWidth) boot();
+else { mapImg.onload = boot; mapImg.onerror = () => { document.getElementById('loader').innerHTML = '<span>No se encuentra ' + C.mapImage + '</span>'; }; }
 </script>
 </body>
 </html>

@@ -39,27 +39,43 @@ En **GitHub Pages** funciona directamente: Settings → Pages → Deploy from br
 
 ---
 
-## Las mesas ya están puestas
+## Las mesas ya están puestas, con los números del plano
 
-`mesas.html` viene generado leyendo el propio plano: se han detectado los 336 rectángulos de mesa dibujados
-y se ha leído la etiqueta de cada isla (rosa `COLLECTOR` / verde `COMMERCIAL` / ámbar `ARTIST VALLEY`),
-así que cada mesa está **encajada al píxel** sobre su dibujo y con su tipo correcto.
+`mesas.html` está generado leyendo el propio PNG, no inventado:
 
-| Categoría | Islas | Mesas | Tipos detectados |
-|---|---|---|---|
-| DIECAST | 9 (A–I) | 108 | A,B,C collector · D–I commercial |
-| FIGURES | 10 (A–J) | 120 | A,B,F,G,H collector · C,D,E,I,J commercial |
-| COMICS | 6 (A–F) | 72 | A,D collector · B,E commercial · C,F Artist Valley |
-| ARCADE | 3 (A–C) | 36 | A,B collector · C commercial |
-| **Total** | **28** | **336** | |
+1. Se detectan los 336 rectángulos de mesa por color (relleno `#E6ECFF`, borde `#3E5CFA`).
+2. Se agrupan en las 28 islas contiguas.
+3. **Se lee por OCR el número impreso en cada mesa** (`A37`, `K59`, `M25`…), girando las etiquetas de las
+   columnas laterales, y se decide letra y número base de cada isla por votación de sus 12 mesas: un fallo
+   puntual de lectura no puede descolocar la numeración. La coincidencia se verificó mesa a mesa.
+4. El tipo sale del color de la etiqueta de la isla: rosa `COLLECTOR`, verde `COMMERCIAL`,
+   ámbar `ARTIST VALLEY`.
+5. La geometría se normaliza: todas las horizontales quedan a 85 × 25 px y todas las verticales a 25 × 85 px,
+   con las columnas y filas de cada isla compartiendo eje. El plano venía con ±2 px de ruido de antialiasing
+   y por eso algunas mesas se veían descuadradas.
 
-**Nomenclatura**: `CATEGORÍA-ZONA-Nº` → `DIECAST-A-1`, `COMICS-F-12`.
-La numeración de cada isla va **en sentido horario** empezando por la mesa de arriba a la izquierda.
+**Cómo numera el plano** (importante para entenderlo): la **letra es la columna** y el **número la fila**,
+de abajo arriba y en bloques de 12. Así que `DIECAST-A` no es una isla, son tres:
 
-**Ojo con Artist Valley**: `COMICS-C` y `COMICS-F` son Artist Valley en el plano. Como este año solo hay
-Collector y Commercial, están puestas como *collector* con tono **claro** para que las distingas de un
-vistazo. Si quieres un tipo propio, se añade en `config.js` en tres líneas y aparece solo en el desplegable
-del builder.
+| Categoría | Islas | Mesas | Letras | Bloques de números |
+|---|---|---|---|---|
+| DIECAST | 9 | 108 | A, B, C | 13-24 · 25-36 · 37-48 |
+| FIGURES | 10 | 120 | D–J | 25-36 · 37-48 |
+| COMICS | 6 | 72 | K, L, M | 25-36 · 37-48 |
+| ARCADE | 3 | 36 | K, L, M | 49-60 |
+| **Total** | **28** | **336** | | |
+
+Dentro de cada isla la numeración arranca en la 3.ª mesa de la columna izquierda y va en sentido
+antihorario: izquierda 3-4, abajo, derecha de abajo arriba, arriba de derecha a izquierda, izquierda 1-2.
+
+**Nomenclatura del ID**: `CATEGORÍA-LETRA-Nº` → `DIECAST-A-37`, `ARCADE-K-59`. El tooltip muestra
+`Zone A · Table 37`, que es exactamente lo que se lee en el plano. Si prefieres que el ID sea solo `A37`
+para que cuadre con la hoja de cálculo, se cambia en el builder o con un buscar-y-reemplazar en `mesas.html`.
+
+**Ojo con Artist Valley**: `COMICS-M-25..36` y `COMICS-M-37..48` son Artist Valley en el plano. Como este
+año solo hay Collector y Commercial, están puestas como *collector* con tono **claro** para que las
+distingas de un vistazo. Si quieres un tipo propio con su precio, se añade en `config.js` en tres líneas y
+aparece solo en el desplegable del builder.
 
 ---
 
@@ -67,7 +83,8 @@ del builder.
 
 **Dos modos de selección**
 
-- **Islas**: al pulsar una mesa seleccionas las 12 de su isla (todas las del mismo prefijo).
+- **Islas**: al pulsar una mesa seleccionas las 12 de su isla. Agrupa por **proximidad en el plano**, no por
+  prefijo, precisamente porque `DIECAST-A` son tres islas distintas.
 - **Mesas**: solo la que pulsas.
 - `Shift + clic` suma o resta de la selección. `Shift + arrastrar` sobre el plano hace un marco de selección.
 - Arrastrar sobre una zona vacía mueve el plano. Rueda = zoom. Tecla `0` = encajar.
@@ -94,9 +111,12 @@ Los tonos salen de `config.js`, así que el builder y el mapa público pintan ex
 **Clonar**
 
 Botones **← ↑ ↓ →**: el clon es idéntico (tamaño, tipo, tono) y se coloca pegado al original con el hueco
-que marques en la casilla de al lado. En modo islas el prefijo salta a la letra libre siguiente
-(`DIECAST-E` → `DIECAST-J` si de la F a la I ya están cogidas); en modo mesas continúa la numeración.
-`Ctrl+D` clona a la derecha.
+que marques en la casilla de al lado. Y **replica la lógica del plano**:
+
+- **a los lados** → letra libre siguiente con los mismos números (`DIECAST-A-37..48` → `DIECAST-D-37..48`)
+- **arriba / abajo** → misma letra y el siguiente bloque de 12 números libre (`A-37..48` → `A-49..60`)
+
+En modo mesas simplemente continúa la numeración. `Ctrl+D` clona a la derecha.
 
 **Deshacer**
 
@@ -132,6 +152,8 @@ letra de zona avanza sola para el siguiente bloque.
 | Esc | deseleccionar |
 | Rueda | zoom |
 | 0 | encajar el plano |
+
+Y en la barra inferior hay un **deslizador de zoom** con − / + y botón de encajar.
 
 **Al acabar**: *Descargar mesas.html* (también lo copia al portapapeles) y reemplazas el `mesas.html` del
 repositorio. *Exportar JSON* deja una copia de seguridad legible por si acaso.
@@ -176,6 +198,22 @@ grep -o 'data-info="[^"]*"' mesas.html | sed 's/data-info="//;s/"//' > ids.txt
 
 ---
 
+## El mapa público (`index.html`)
+
+Reescrito en esta revisión:
+
+- **Zoom continuo** del 100 % al 1600 % con **deslizador vertical** a la derecha, botones − / +, botón de
+  encajar, rueda del ratón (hace zoom donde apunta el cursor), doble clic, teclas `+` `−` `0` y pinza en
+  móvil. Se arrastra para moverse y el plano no se puede perder de vista.
+- **Tooltip rediseñado**: tarjeta blanca con una línea de color del tipo de mesa arriba, el ID grande
+  (`A45`), la etiqueta del tipo, categoría / zona / mesa, y el precio con la tarifa tachada, el precio
+  early bird y su píldora. Ya no es un bloque verde. Es un overlay de tamaño fijo, así que se lee igual de
+  bien al 100 % que al 1600 %.
+- **Estado agotado**: la mesa pasa a rojo y el tooltip muestra `SOLD OUT`, con el nombre del expositor si lo
+  has puesto en la columna D de la hoja.
+- **Buscador** arriba a la derecha: escribes `A37`, `K59` o solo `A` y te enfoca y resalta las mesas.
+- **Leyenda con recuento** y filtro: pulsas *Collector*, *Commercial* o *Sold out* y atenúa el resto.
+
 ## Precios
 
 En `config.js`:
@@ -202,3 +240,9 @@ No hay que tocar nada más.
 4. Sacas los IDs con el `grep` de arriba y los pegas en la hoja de cálculo.
 5. `builder-sellers.html` para los logos → *Descargar seller.html*.
 6. `git commit` + `push`. GitHub Pages publica el mapa.
+
+## Para el Pabellón 2
+
+Mismo repo con `Hall 2.png`, y en `config.js` cambias `hallName`, `hallLabel`, `mapImage` y las
+`categories` por TCG y Sport Cards. Las mesas se pueden extraer igual del plano: los colores de mesa y de
+etiqueta son los mismos, solo cambian los colores de fondo de zona.

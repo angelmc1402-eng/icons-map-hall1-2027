@@ -42,12 +42,12 @@ window.ICONS_CONFIG = {
         collector: {
             label: 'Collector Table',
             price: 100,
-            palette: { light: '#7be3a7', base: '#2ecc71', dark: '#15803d' }
+            palette: { light: '#6ee7b7', base: '#10b981', dark: '#047857' }
         },
         commercial: {
             label: 'Commercial Table',
             price: 250,
-            palette: { light: '#9ed4f7', base: '#3498db', dark: '#1a5f92' }
+            palette: { light: '#93c5fd', base: '#3b82f6', dark: '#1d4ed8' }
         }
     },
 
@@ -61,7 +61,7 @@ window.ICONS_CONFIG = {
     },
 
     /* --- Color de mesa vendida ------------------------------ */
-    soldColor: '#e74c3c',
+    soldColor: '#e11d48',
     soldLabel: 'SOLD OUT',
 
     /* --- Tonos disponibles ---------------------------------- */
@@ -73,11 +73,13 @@ window.ICONS_CONFIG = {
 
     /* --- Tamaños por defecto al crear mesas (en % del plano) - */
     defaults: {
-        horizontal: { w: 1.10, h: 0.50 },
-        vertical:   { w: 0.36, h: 1.42 },
-        gapX: 0.02,
-        gapY: 0.05,
-        cloneGap: 0.30
+        /* medidas reales de las mesas del plano de Hall 1 (85x25 px sobre 7499x5675) */
+        horizontal: { w: 1.1335, h: 0.4405 },
+        vertical:   { w: 0.3334, h: 1.4978 },
+        gapX: 0.04,
+        gapY: 0.07,
+        cloneGap: 0.30,
+        ring: { top: 2, side: 4, bottom: 2 }
     }
 };
 

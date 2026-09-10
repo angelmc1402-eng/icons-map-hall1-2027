@@ -64,7 +64,10 @@ textarea{min-height:80px;font-family:monospace;font-size:11px;resize:vertical}
 #props::-webkit-scrollbar{width:8px}#props::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
 #bar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:20000;background:rgba(15,23,42,.92);padding:8px;border-radius:999px;box-shadow:0 14px 34px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08)}
 #bar .btn{width:auto;padding:9px 16px;border-radius:999px}
-#zoom-tag{align-self:center;color:#94a3b8;font-size:10px;font-weight:900;padding:0 10px;font-family:monospace}
+#zoom-tag{align-self:center;color:#94a3b8;font-size:10px;font-weight:900;padding:0 8px;font-family:monospace;min-width:48px;text-align:center}
+#bar #zoom-range{width:128px;align-self:center;height:4px;padding:0;border:none;border-radius:99px;background:#334155;cursor:pointer;-webkit-appearance:none;appearance:none}
+#bar #zoom-range::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:2.5px solid #00d2d3;cursor:grab}
+#bar #zoom-range::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid #00d2d3;cursor:grab}
 #clip{position:absolute;left:-9999px;top:-9999px}
 .list{max-height:180px;overflow-y:auto;border:1px solid var(--line);border-radius:7px;background:#fff}
 .list-item{padding:6px 8px;font-size:11px;font-weight:800;color:var(--ink-2);border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
@@ -194,6 +197,10 @@ textarea{min-height:80px;font-family:monospace;font-size:11px;resize:vertical}
 <div id="bar">
     <button class="btn b-light" onclick="undo()" id="btn-undo">↩ Deshacer</button>
     <button class="btn b-light" onclick="redo()" id="btn-redo">↪ Rehacer</button>
+    <button class="btn b-light" onclick="zoomStep(1/1.35)">−</button>
+    <input type="range" id="zoom-range" min="0" max="1000" value="0" oninput="zoomFromSlider(this.value)">
+    <button class="btn b-light" onclick="zoomStep(1.35)">+</button>
+    <button class="btn b-light" onclick="fitView()">⤢</button>
     <span id="zoom-tag">—</span>
     <button class="btn b-dark" onclick="doExport(true)">📋 Copiar</button>
     <button class="btn b-green" onclick="doExport(false)">💾 Descargar seller.html</button>
@@ -615,17 +622,32 @@ function onWheel(e){
     e.preventDefault();
     const before = mouseToPct(e);
     const k = e.deltaY > 0 ? .88 : 1.14;
-    const ns = scale*k;
-    if (ns < .03 || ns > 20) return;
+    const ns = Math.min(ZMAX, Math.max(ZMIN, scale*k));
+    if (ns === scale) return;
     scale = ns; applyScale();
     const vr = viewport.getBoundingClientRect();
     viewport.scrollLeft = (before.x/100)*mapImg.naturalWidth*scale - (e.clientX-vr.left);
     viewport.scrollTop = (before.y/100)*mapImg.naturalHeight*scale - (e.clientY-vr.top);
 }
+const ZMIN = 0.03, ZMAX = 8;
 function applyScale(){
     container.style.transform = `scale(${scale})`;
     document.getElementById('zoom-tag').textContent = Math.round(scale*100)+' %';
+    const r = document.getElementById('zoom-range');
+    if (r) r.value = Math.round(1000*Math.log(scale/ZMIN)/Math.log(ZMAX/ZMIN));
     drawHandle();
+}
+function zoomFromSlider(v){ zoomAtCenter(ZMIN*Math.pow(ZMAX/ZMIN, v/1000)); }
+function zoomStep(k){ zoomAtCenter(scale*k); }
+function zoomAtCenter(z){
+    const nz = Math.min(ZMAX, Math.max(ZMIN, z));
+    const vr = viewport.getBoundingClientRect();
+    const cx = 350 + (viewport.clientWidth - 350 - 330)/2;
+    const cy = (viewport.clientHeight - 130)/2;
+    const before = mouseToPct({clientX: vr.left+cx, clientY: vr.top+cy});
+    scale = nz; applyScale();
+    viewport.scrollLeft = (before.x/100)*mapImg.naturalWidth*scale - cx;
+    viewport.scrollTop  = (before.y/100)*mapImg.naturalHeight*scale - cy;
 }
 function fitView(){
     const w = mapImg.naturalWidth || 7499;
