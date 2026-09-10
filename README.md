@@ -9,7 +9,8 @@ El Pabellón 2 (TCG · Sport Cards) va en su propio repositorio, con la misma es
 
 | Fichero | Para qué sirve |
 |---|---|
-| `index.html` | El mapa público. Es lo que se publica y lo que ve el cliente. |
+| `index.html` | **El mapa público**, limpio: solo el plano, las fichas de mesa y 4 niveles de zoom. Es lo que se publica, lo que se embebe en un listing y lo que se ve en móvil. |
+| `filters.html` | La versión con herramientas: leyenda con recuento y filtros, buscador de mesas y zoom continuo con deslizador. Para uso interno o para quien quiera hurgar. |
 | `config.js` | **El único fichero que tocas** para precios, colores, categorías y la URL de la hoja de cálculo. Lo leen los tres HTML. |
 | `mesas.html` | Las mesas. Lo genera el builder. **Ya viene relleno con las 336 mesas del plano.** |
 | `seller.html` | Los expositores con logo. Vacío por ahora; lo genera el sellers builder. |
@@ -200,19 +201,48 @@ grep -o 'data-info="[^"]*"' mesas.html | sed 's/data-info="//;s/"//' > ids.txt
 
 ## El mapa público (`index.html`)
 
-Reescrito en esta revisión:
+Deliberadamente desnudo: **sin título, sin leyenda y sin buscador**, para que se vea el plano y nada más.
+Todo eso vive en `filters.html`.
 
-- **Zoom continuo** del 100 % al 1600 % con **deslizador vertical** a la derecha, botones − / +, botón de
-  encajar, rueda del ratón (hace zoom donde apunta el cursor), doble clic, teclas `+` `−` `0` y pinza en
-  móvil. Se arrastra para moverse y el plano no se puede perder de vista.
-- **Tooltip rediseñado**: tarjeta blanca con una línea de color del tipo de mesa arriba, el ID grande
-  (`A45`), la etiqueta del tipo, categoría / zona / mesa, y el precio con la tarifa tachada, el precio
-  early bird y su píldora. Ya no es un bloque verde. Es un overlay de tamaño fijo, así que se lee igual de
-  bien al 100 % que al 1600 %.
-- **Estado agotado**: la mesa pasa a rojo y el tooltip muestra `SOLD OUT`, con el nombre del expositor si lo
+- **4 niveles de zoom** con la botonera `×1 ×2 ×3 ×4` abajo a la derecha (centrada en móvil), botón
+  **BACK** para volver a la vista completa, clic en el plano para subir un nivel (y volver al principio
+  tras el último), rueda del ratón, y teclas `1`-`4`, `+`, `−` y `Esc`. Con zoom se arrastra para moverse.
+- **Ficha de mesa** al pasar por encima en escritorio y **al tocarla en móvil**: tarjeta blanca con una
+  línea del color del tipo arriba, el ID grande (`A45`), la etiqueta del tipo, categoría / zona / mesa y el
+  precio con la tarifa tachada más el early bird. Es un overlay de tamaño fijo, así que se lee igual de
+  bien en la vista completa que en el nivel más cercano.
+- **Estado agotado**: la mesa pasa a rojo y la ficha muestra `SOLD OUT`, con el nombre del expositor si lo
   has puesto en la columna D de la hoja.
-- **Buscador** arriba a la derecha: escribes `A37`, `K59` o solo `A` y te enfoca y resalta las mesas.
-- **Leyenda con recuento** y filtro: pulsas *Collector*, *Commercial* o *Sold out* y atenúa el resto.
+
+### Por qué 4 niveles y no un zoom libre
+
+Escalar con `transform: scale()` una imagen de 7499 px obliga al navegador a mantener una capa compositada
+enorme. Pasado cierto punto no la puede rasterizar y **el plano se queda gris**, sobre todo en móvil al
+alejar después de un zoom fuerte. Dos medidas contra eso:
+
+1. La animación usa `transform`, pero **en cuanto termina la escala se aplica al layout**: el contenedor
+   pasa a medir los píxeles reales y el `transform` vuelve a ser solo un desplazamiento. Así el navegador
+   trata la imagen como una imagen normal y la pinta en mosaico.
+2. El nivel más cercano se **recorta automáticamente** si con esa pantalla y densidad de píxeles pediría
+   más resolución de la que el navegador puede pintar (`MAX_RASTER` en `index.html`). En un portátil normal
+   los niveles son ×1 ×2,2 ×4 ×6; en móvil ×1 ×2,8 ×5 ×8; en un 2K retina el último baja solo.
+
+Una nota de geometría: el plano es 4:3 tumbado, así que en un móvil vertical (9:19) llena el ancho y deja
+franjas arriba y abajo por mucho que se ajuste. Se ve entero, que es lo que se quiere de un plano, y con
+un toque ya se entra al nivel que llena la pantalla.
+
+## La versión con filtros (`filters.html`)
+
+Lo mismo más las herramientas, para quien las quiera:
+
+- **Zoom continuo** del 100 % al 800 % con deslizador vertical, botones − / +, encajar, rueda (hace zoom
+  donde apunta el cursor), doble clic, teclas y pinza en móvil.
+- **Buscador**: escribes `A37`, `K59` o solo `A` y te enfoca y resalta las mesas.
+- **Leyenda con recuento** que además filtra: pulsas *Collector*, *Commercial* o *Sold out* y atenúa el
+  resto.
+- Enlace de vuelta al mapa simple.
+
+Lleva la misma protección contra el gris y el tope en 800 % por el mismo motivo.
 
 ## Precios
 
@@ -239,7 +269,8 @@ No hay que tocar nada más.
 3. *Descargar mesas.html* y reemplazas el del repositorio.
 4. Sacas los IDs con el `grep` de arriba y los pegas en la hoja de cálculo.
 5. `builder-sellers.html` para los logos → *Descargar seller.html*.
-6. `git commit` + `push`. GitHub Pages publica el mapa.
+6. `git commit` + `push`. GitHub Pages publica el mapa: `index.html` en la raíz y `filters.html` en
+   `/filters.html`.
 
 ## Para el Pabellón 2
 
