@@ -511,13 +511,17 @@ function clusters(){
     const parent = ms.map((_, i) => i);
     const find = a => { while (parent[a] !== a) a = parent[a] = parent[parent[a]]; return a; };
     const uni = (a, b) => { a = find(a); b = find(b); if (a !== b) parent[b] = a; };
-    const TOL = 1.0;   // % del plano: separa islas (>2.5%) sin partir anillos (<0.6%)
+    /* El hueco va en píxeles del plano (config.js) y se convierte a % en cada
+       eje: 1 % de ancho y 1 % de alto no son los mismos píxeles. */
+    const gapPx = (C.defaults && C.defaults.islandGapPx) || 110;
+    const TOLX = gapPx / (mapImg.naturalWidth  || 7499) * 100;
+    const TOLY = gapPx / (mapImg.naturalHeight || 5675) * 100;
     for (let i = 0; i < ms.length; i++){
         for (let j = i + 1; j < ms.length; j++){
             const A = box[i], B = box[j];
             const gx = Math.max(0, Math.max(A.l, B.l) - Math.min(A.r, B.r));
             const gy = Math.max(0, Math.max(A.t, B.t) - Math.min(A.b, B.b));
-            if (gx < TOL && gy < TOL) uni(i, j);
+            if (gx < TOLX && gy < TOLY) uni(i, j);
         }
     }
     const map = new Map();

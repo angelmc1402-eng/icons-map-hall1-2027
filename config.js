@@ -79,6 +79,11 @@ window.ICONS_CONFIG = {
         gapX: 0.04,
         gapY: 0.07,
         cloneGap: 0.30,
+        /* Hueco máximo, en píxeles del plano, para que el builder considere que
+           dos mesas son de la misma isla. Tiene que ser mayor que el hueco
+           interior de un anillo y menor que la separación entre anillos.
+           En Hall 1: hueco interior hasta ~79 px, separación entre anillos >165 px. */
+        islandGapPx: 110,
         ring: { top: 2, side: 4, bottom: 2 }
     }
 };

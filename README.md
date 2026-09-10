@@ -11,7 +11,7 @@ El Pabellón 2 (TCG · Sport Cards) va en su propio repositorio, con la misma es
 |---|---|
 | `index.html` | **El mapa público**, limpio: solo el plano, las fichas de mesa y 4 niveles de zoom. Es lo que se publica, lo que se embebe en un listing y lo que se ve en móvil. |
 | `filters.html` | La versión con herramientas: leyenda con recuento y filtros, buscador de mesas y zoom continuo con deslizador. Para uso interno o para quien quiera hurgar. |
-| `config.js` | **El único fichero que tocas** para precios, colores, categorías y la URL de la hoja de cálculo. Lo leen los tres HTML. |
+| `config.js` | **El único fichero que tocas** para precios, colores, categorías y la URL de la hoja de cálculo. Lo leen los cuatro HTML. |
 | `mesas.html` | Las mesas. Lo genera el builder. **Ya viene relleno con las 336 mesas del plano.** |
 | `seller.html` | Los expositores con logo. Vacío por ahora; lo genera el sellers builder. |
 | `builder.html` | Tables Builder Pro: crear, mover, redimensionar, colorear, clonar y numerar mesas. |
