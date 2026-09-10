@@ -12,23 +12,8 @@ window.ICONS_CONFIG = {
     hallLabel: 'Pabellón 1 · Diecast, Figures & Dolls, Comics & Arcade',
     mapImage: 'Hall 1.png',
 
-    /* --- Hoja de cálculo (Google Sheets publicado como CSV) ---
-       OJO: aquí NO vale la URL de /edit del navegador. Tiene que ser una URL
-       que devuelva CSV de verdad. Dos formas válidas:
-         a) Archivo > Compartir > Publicar en la web > hoja concreta + CSV
-            -> https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=NNN&single=true&output=csv
-         b) con la hoja compartida como "cualquiera con el enlace: lector"
-            -> https://docs.google.com/spreadsheets/d/ID_DEL_LIBRO/gviz/tq?tqx=out:csv&gid=NNN
-       El gid es el de la pestaña (se ve en la URL del navegador al abrirla).
-       Contrato de columnas (fila 1 = cabecera, se ignora):
-         col A = lo que quieras (nombre vendedor, notas...)
-         col B = ESTADO   -> "VENDIDA" / "SOLD" marca la mesa como agotada
-         col C = ID MESA  -> debe coincidir exactamente con data-info
-         col D = (opcional) nombre del vendedor que se muestra en el tooltip
     ---------------------------------------------------------- */
     csvUrl: 'https://docs.google.com/spreadsheets/d/1b9mT5RqDehK0-28XoN2LCMg80D7Yv8uHFVDbofPK0gw/gviz/tq?tqx=out:csv&gid=672655889',
-    /* Alternativa si prefieres publicar la hoja en vez de compartirla por enlace:
-       csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=672655889&single=true&output=csv', */
     csvRefreshMs: 120000,
 
     /* --- Categorías del pabellón -----------------------------
@@ -81,7 +66,7 @@ window.ICONS_CONFIG = {
     loupe: {
         enabled: true,
         size: 280,
-        zoom: 3.6,
+        zoom: 3,
         border: 3
     },
 
