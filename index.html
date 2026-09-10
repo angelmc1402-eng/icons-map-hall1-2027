@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ICONS 2027 · HALL 1 · Interactive Floor Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+    --sold-red:#e74c3c;
+    --vip-purple:#9b59b6;
+    --text-gray:#95a5a6;
+    --text-dark:#1f2937;
+    --font-main:'Inter',sans-serif;
+    --map-scale:1;
+}
+body,html{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f3f4f6;font-family:var(--font-main)}
+#map-wrapper{width:100vw;height:100vh;position:relative;overflow:hidden}
+#container{position:absolute;top:0;left:0;transform-origin:0 0;transition:transform .4s cubic-bezier(.25,1,.5,1);cursor:crosshair;touch-action:none;display:inline-block}
+#map-img{display:block;image-rendering:high-quality;max-width:none;user-select:none;-webkit-user-drag:none}
+
+#capa-mesas,#capa-sponsors{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+#capa-sponsors{z-index:50}
+
+body.is-state-1 #container,body.is-state-2 #container{cursor:grab}
+body.is-state-1 #container:active,body.is-state-2 #container:active{cursor:grabbing}
+
+/* ---------- MESAS ---------- */
+.mesa{position:absolute;box-sizing:border-box;border:1.5px solid #2ecc71;background:rgba(46,204,113,.25);border-radius:2px;pointer-events:none}
+body.is-state-1 .mesa,body.is-state-2 .mesa{pointer-events:auto;cursor:pointer}
+body.is-state-1 .mesa:hover,body.is-state-2 .mesa:hover{z-index:999;border-color:#fff!important;box-shadow:0 0 15px rgba(0,0,0,.3);filter:brightness(1.35) saturate(1.2)}
+.mesa.agotada{cursor:not-allowed}
+
+/* ---------- TOOLTIP DE MESA ---------- */
+.tt{
+    position:absolute;bottom:150%;left:50%;
+    transform:translateX(-50%) translateY(10px) scale(calc(1 / var(--map-scale)));
+    transform-origin:bottom center;width:340px;background:#fff;border-radius:12px;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);opacity:0;pointer-events:none;
+    transition:all .2s ease;overflow:hidden;display:flex;flex-direction:column;z-index:1000;
+}
+body.is-state-1 .mesa:hover .tt,body.is-state-2 .mesa:hover .tt{opacity:1;transform:translateX(-50%) translateY(0) scale(calc(1 / var(--map-scale)))}
+.tt-row{display:flex;border-bottom:1px solid #f1f5f9}
+.tt-cell{flex:1;padding:10px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #f1f5f9}
+.tt-cell:last-child{border-right:none}
+.tt-label{color:var(--text-gray);font-size:9px;font-weight:900;text-transform:uppercase;margin-bottom:2px;letter-spacing:.05em}
+.tt-value{font-size:14px;font-weight:900;color:var(--text-dark);text-align:center;line-height:1.2}
+.tt-seller{padding:9px 12px;font-size:12px;font-weight:800;color:#475569;background:#f8fafc;text-align:center;border-bottom:1px solid #f1f5f9}
+.tt-foot{padding:11px 12px;color:#fff;text-align:center;display:flex;flex-direction:column;gap:3px}
+.tt-type{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;opacity:.92}
+.tt-price{display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:900}
+.tt-old{font-size:13px;font-weight:700;opacity:.7;text-decoration:line-through}
+.tt-eb{font-size:9px;font-weight:900;letter-spacing:.08em;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:99px;align-self:center}
+.tt-sold{font-size:15px;font-weight:900;letter-spacing:.08em}
+
+/* ---------- SELLERS / SPONSORS ---------- */
+.sponsor-zone{position:absolute;pointer-events:none;transition:transform .2s cubic-bezier(.175,.885,.32,1.275)}
+body.is-state-1 .sponsor-zone,body.is-state-2 .sponsor-zone{pointer-events:auto}
+.sponsor-zone:hover{transform:scale(1.08);z-index:9000}
+.sponsor-logo-box{width:100%;height:100%;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;padding:5px;box-sizing:border-box;border:2px solid #fff;transition:border-color .2s}
+.sponsor-zone:hover .sponsor-logo-box{border-color:var(--vip-purple)}
+.sponsor-logo-box img{width:100%;height:100%;object-fit:contain}
+.sponsor-logo-box.multi-logo{display:grid;gap:4px;align-items:stretch;justify-items:stretch}
+.sponsor-logo-box.multi-logo img{width:100%;height:100%;min-width:0;min-height:0;object-fit:contain}
+.layout-dual-horizontal{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
+.layout-dual-vertical{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}
+.layout-triple-vertical{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}
+.layout-quad-vertical{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(4,minmax(0,1fr))}
+
+.sponsor-tooltip{
+    position:absolute;bottom:100%;left:50%;margin-bottom:15px;
+    transform:translateX(-50%) translateY(10px) scale(calc(1 / var(--map-scale)));
+    transform-origin:bottom center;background:#fff;border-radius:14px;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);padding:18px;width:max-content;min-width:200px;
+    opacity:0;pointer-events:none;transition:all .25s ease;border-top:5px solid var(--vip-purple);
+}
+.sponsor-tooltip::after{content:'';position:absolute;top:100%;left:-30px;right:-30px;height:50px}
+.sponsor-zone:hover .sponsor-tooltip{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0) scale(calc(1 / var(--map-scale)))}
+.sp-name{font-size:18px;font-weight:900;color:var(--text-dark);margin-bottom:14px;letter-spacing:-.02em}
+.sp-links{display:flex;flex-direction:column;gap:8px}
+.sp-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:800;transition:all .2s}
+.sp-btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1)}
+.btn-ig{background:#fdf2f8;color:#e1306c;border:1px solid #fbcfe8}
+.btn-web{background:#f8fafc;color:#334155;border:1px solid #e2e8f0}
+.sp-icon{width:18px;height:18px;object-fit:contain}
+
+/* ---------- UI ---------- */
+#legend{
+    position:fixed;top:22px;left:22px;background:rgba(255,255,255,.96);border-radius:14px;
+    padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:20000;backdrop-filter:blur(6px);
+}
+#legend h1{margin:0 0 3px;font-size:14px;font-weight:900;letter-spacing:-.02em;color:var(--text-dark)}
+#legend .sub{font-size:10px;font-weight:800;color:var(--text-gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
+.lg-row{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:#475569;padding:2px 0}
+.lg-dot{width:13px;height:13px;border-radius:3px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+#legend .eb{margin-top:10px;font-size:9px;font-weight:900;color:#0f766e;background:#ccfbf1;padding:4px 8px;border-radius:99px;display:inline-block;letter-spacing:.05em}
+
+#side-menu{position:fixed;right:-150px;bottom:100px;transition:right .4s cubic-bezier(.175,.885,.32,1.275);z-index:20000}
+#side-menu.visible{right:30px}
+.btn-back{background:#fff;border:none;padding:12px 24px;border-radius:50px;font-family:var(--font-main);font-weight:900;font-size:13px;color:var(--text-dark);box-shadow:0 10px 25px rgba(0,0,0,.1);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
+.btn-back:hover{transform:scale(1.05);color:#27ae60}
+
+#zoom-ui{position:fixed;bottom:30px;right:30px;background:#fff;padding:6px;border-radius:50px;box-shadow:0 10px 30px rgba(0,0,0,.1);z-index:20000;display:flex;gap:5px}
+.zoom-btn{width:45px;height:45px;border-radius:50%;border:none;background:transparent;font-weight:900;color:var(--text-gray);cursor:pointer;transition:all .2s;font-size:14px}
+.zoom-btn:hover{background:#f1f5f9;color:var(--text-dark)}
+.zoom-btn.active{background:var(--text-dark);color:#fff}
+
+#loupe{position:fixed;width:260px;height:260px;border-radius:50%;border:4px solid #fff;box-shadow:0 15px 35px rgba(0,0,0,.3);pointer-events:none;overflow:hidden;z-index:15000;opacity:0;display:none;background:#fff;left:0;top:0;will-change:transform}
+#loupe.visible{opacity:1;display:block}
+#loupe-inner{position:absolute;transform-origin:0 0;pointer-events:none;will-change:transform}
+#loupe .tt,#loupe .sponsor-tooltip{display:none!important}
+
+@media(max-width:768px){
+    #side-menu{display:none}
+    #zoom-ui{right:50%;transform:translateX(50%);bottom:25px}
+    .tt{width:300px}
+    #loupe{display:none!important}
+    #legend{top:12px;left:12px;padding:10px 12px}
+    #legend h1{font-size:12px}
+}
+</style>
+</head>
+<body class="is-state-0">
+
+<div id="map-wrapper">
+    <div id="container">
+        <img id="map-img" alt="Hall 1 Floor Plan">
+        <div id="capa-mesas"></div>
+        <div id="capa-sponsors"></div>
+    </div>
+</div>
+
+<div id="loupe"><div id="loupe-inner"></div></div>
+
+<div id="legend">
+    <h1 id="lg-title">ICONS 2027 · HALL 1</h1>
+    <div class="sub" id="lg-sub"></div>
+    <div id="lg-rows"></div>
+    <div class="eb" id="lg-eb"></div>
+</div>
+
+<div id="side-menu">
+    <button class="btn-back" onclick="setZoomStateUI(0,event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        BACK
+    </button>
+</div>
+
+<div id="zoom-ui">
+    <button class="zoom-btn active" onclick="setZoomStateUI(0,event)">x1</button>
+    <button class="zoom-btn" onclick="setZoomStateUI(1,event)">x2</button>
+    <button class="zoom-btn" onclick="setZoomStateUI(2,event)">x3</button>
+</div>
+
+<script src="config.js"></script>
+<script>
+const C = window.ICONS_CONFIG;
+const dictionaryMesas = new Map();
+
+document.getElementById('map-img').src = C.mapImage;
+document.getElementById('lg-title').textContent = 'ICONS 2027 · ' + C.hallName;
+document.getElementById('lg-sub').textContent = C.categories.map(c => c.label).join(' · ');
+
+/* Leyenda generada desde config.js */
+(function legend(){
+    const rows = document.getElementById('lg-rows');
+    Object.keys(C.types).forEach(k => {
+        const p = C.priceFor(k);
+        const col = C.colorFor(k, 'base', '');
+        rows.insertAdjacentHTML('beforeend',
+            `<div class="lg-row"><span class="lg-dot" style="background:${C.rgba(col,.55)};border-color:${C.shade(col,.28)}"></span>
+             ${C.types[k].label} · ${p.early ? p.early : p.base}</div>`);
+    });
+    rows.insertAdjacentHTML('beforeend',
+        `<div class="lg-row"><span class="lg-dot" style="background:${C.rgba(C.soldColor,.55)};border-color:${C.shade(C.soldColor,.28)}"></span>${C.soldLabel}</div>`);
+    const eb = document.getElementById('lg-eb');
+    if (C.earlyBird.active) eb.textContent = C.earlyBird.label; else eb.style.display = 'none';
+})();
+
+/* ---------- MESAS ---------- */
+async function cargarMesas(){
+    try{
+        const resp = await fetch('mesas.html?v=' + Date.now(), {cache:'no-store'});
+        const html = await resp.text();
+        document.getElementById('capa-mesas').innerHTML = html;
+
+        document.querySelectorAll('.mesa').forEach(m => {
+            const info = m.dataset.info || '';
+            dictionaryMesas.set(info, m);
+
+            /* Tipo: primero el data-type del builder; si no existe, se deduce del ID */
+            const type = m.dataset.type || (/COMMERCIAL/i.test(info) ? 'commercial' : 'collector');
+            const tone = m.dataset.tone || 'base';
+            m.dataset.type = type;
+
+            const hex = C.colorFor(type, tone, m.dataset.color || '');
+            m.style.backgroundColor = C.rgba(hex, .30);
+            m.style.borderColor = C.shade(hex, .25);
+            m._hex = hex;
+
+            const p = C.parseId(info);
+            const price = C.priceFor(type);
+            const typeLabel = (C.types[type] || C.types.collector).label;
+
+            m.innerHTML = `
+                <div class="tt">
+                    <div class="tt-row">
+                        <div class="tt-cell"><span class="tt-label">Category</span><span class="tt-value">${p.catLabel}</span></div>
+                        <div class="tt-cell"><span class="tt-label">Zone</span><span class="tt-value">${p.zone}</span></div>
+                        <div class="tt-cell"><span class="tt-label">Table</span><span class="tt-value">${p.num}</span></div>
+                    </div>
+                    <div class="tt-seller" data-seller style="display:none"></div>
+                    <div class="tt-foot" style="background:${C.shade(hex,.18)}">
+                        <span class="tt-type">${typeLabel}</span>
+                        <span class="tt-price">
+                            ${price.early ? `<span class="tt-old">${price.base}</span><span>${price.early}</span>`
+                                          : `<span>${price.base}</span>`}
+                        </span>
+                        ${price.early ? `<span class="tt-eb">${C.earlyBird.label}</span>` : ''}
+                    </div>
+                </div>`;
+        });
+        await sincronizarConExcel();
+    }catch(e){ console.error('Error loading tables:', e); }
+}
+
+/* ---------- SELLERS ---------- */
+async function cargarSponsors(){
+    try{
+        const resp = await fetch('seller.html?v=' + Date.now(), {cache:'no-store'});
+        if (!resp.ok) return;
+        const html = await resp.text();
+        document.getElementById('capa-sponsors').innerHTML = html;
+
+        const igIcon = 'https://cdn.shopify.com/s/files/1/0772/3633/9020/files/Instagram_icon_a7c6e898-1b4b-42cf-a525-04f05aea43a2.png?v=1778103647';
+        const webIcon = '<svg class="sp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
+
+        document.querySelectorAll('.sponsor-zone').forEach(sp => {
+            const name = sp.dataset.name || '';
+            const logo = sp.dataset.logo || '';
+            const ig = sp.dataset.ig || '';
+            const web = sp.dataset.web || '';
+            const legacyDual = sp.dataset.dual === 'true';
+            const requested = sp.dataset.logoLayout || (legacyDual ? 'dual-vertical' : 'single');
+            const valid = new Set(['single','dual-horizontal','dual-vertical','triple-vertical','quad-vertical']);
+            const layout = valid.has(requested) ? requested : 'single';
+            const counts = {'single':1,'dual-horizontal':2,'dual-vertical':2,'triple-vertical':3,'quad-vertical':4};
+            const n = counts[layout];
+            const boxClass = layout === 'single' ? 'sponsor-logo-box' : `sponsor-logo-box multi-logo layout-${layout}`;
+            const logoHTML = Array.from({length:n}, () => `<img src="${logo}" alt="${name}">`).join('');
+
+            sp.innerHTML = `
+                <div class="${boxClass}">
+                    ${logo ? logoHTML : `<span style="color:#333;font-size:10px;font-weight:900">${name}</span>`}
+                </div>
+                <div class="sponsor-tooltip">
+                    <div class="sp-name">${name}</div>
+                    <div class="sp-links">
+                        ${ig ? `<a href="${ig}" target="_blank" rel="noopener" class="sp-btn btn-ig"><img src="${igIcon}" class="sp-icon"> Instagram</a>` : ''}
+                        ${web ? `<a href="${web}" target="_blank" rel="noopener" class="sp-btn btn-web">${webIcon} Visit Website</a>` : ''}
+                    </div>
+                </div>`;
+        });
+        syncLoupe();
+    }catch(e){ console.error('Error loading sellers:', e); }
+}
+
+/* ---------- HOJA DE CÁLCULO ---------- */
+function splitCSVLine(line){
+    return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+}
+async function sincronizarConExcel(){
+    if (!C.csvUrl) return;
+    try{
+        const resp = await fetch(C.csvUrl + '&cache_ignore=' + Date.now(), {method:'GET', mode:'cors', cache:'no-cache'});
+        const rows = (await resp.text()).split(/\r?\n/);
+        rows.forEach((row, i) => {
+            if (i === 0 || !row.trim()) return;
+            const col = splitCSVLine(row);
+            if (col.length < 3) return;
+            const estado = (col[1] || '').toUpperCase();
+            const id = col[2] || '';
+            const sellerName = col[3] || '';
+            const m = dictionaryMesas.get(id);
+            if (!m) return;
+
+            const foot = m.querySelector('.tt-foot');
+            const sellerBox = m.querySelector('[data-seller]');
+            const sold = estado.includes('VENDIDA') || estado.includes('SOLD');
+
+            if (sold){
+                m.classList.add('agotada');
+                m.style.backgroundColor = C.rgba(C.soldColor, .38);
+                m.style.borderColor = C.shade(C.soldColor, .2);
+                if (foot){
+                    foot.style.background = C.shade(C.soldColor, .12);
+                    foot.innerHTML = `<span class="tt-sold">${C.soldLabel}</span>`;
+                }
+            } else {
+                m.classList.remove('agotada');
+                m.style.backgroundColor = C.rgba(m._hex, .30);
+                m.style.borderColor = C.shade(m._hex, .25);
+            }
+            if (sellerBox && sellerName){
+                sellerBox.textContent = sellerName;
+                sellerBox.style.display = 'block';
+            }
+        });
+        syncLoupe();
+    }catch(err){ console.error('Sync error:', err); }
+}
+
+/* ---------- ZOOM & NAVEGACIÓN ---------- */
+const container = document.getElementById('container');
+const mapImg = document.getElementById('map-img');
+let currentZoomState = 0, baseScale = 1, currentScale = 1, currentX = 0, currentY = 0;
+let isDragging = false, startX, startY, initialX, initialY;
+
+function initMapPosition(){
+    if (mapImg.naturalWidth === 0){ setTimeout(initMapPosition, 100); return; }
+    const sx = window.innerWidth / mapImg.naturalWidth;
+    const sy = window.innerHeight / mapImg.naturalHeight;
+    baseScale = Math.min(sx, sy) * 0.98;
+    if (baseScale > 1) baseScale = 1;
+    setZoomState(0, null, null, true);
+}
+window.onload = () => {
+    if (mapImg.complete) initMapPosition(); else mapImg.onload = initMapPosition;
+    cargarMesas(); cargarSponsors();
+};
+
+function setZoomState(state, cx = null, cy = null, instant = false){
+    currentZoomState = state;
+    let mult = 1;
+    if (state === 1) mult = window.innerWidth < 768 ? 3.0 : 2.5;
+    if (state === 2) mult = window.innerWidth < 768 ? 7.0 : 6.0;
+    const newScale = baseScale * mult;
+    document.documentElement.style.setProperty('--map-scale', newScale);
+    document.querySelectorAll('.zoom-btn').forEach((b,i) => b.classList.toggle('active', i === state));
+    document.body.className = 'is-state-' + state;
+    container.style.transition = instant ? 'none' : 'transform .4s cubic-bezier(.25,1,.5,1)';
+    if (state === 0){
+        currentScale = baseScale;
+        currentX = (window.innerWidth - mapImg.naturalWidth * baseScale) / 2;
+        currentY = (window.innerHeight - mapImg.naturalHeight * baseScale) / 2;
+        container.style.transform = `translate(${currentX}px,${currentY}px) scale(${currentScale})`;
+        document.getElementById('side-menu').classList.remove('visible');
+        document.querySelectorAll('.tt,.sponsor-tooltip').forEach(t => {
+            t.style.opacity = '0'; t.style.pointerEvents = 'none';
+            setTimeout(() => { t.style.opacity = ''; t.style.pointerEvents = ''; }, 300);
+        });
+    } else {
+        document.getElementById('side-menu').classList.add('visible');
+        const centerX = window.innerWidth/2, centerY = window.innerHeight/2;
+        const ux = ((cx !== null ? cx : centerX) - currentX) / currentScale;
+        const uy = ((cy !== null ? cy : centerY) - currentY) / currentScale;
+        currentX = centerX - ux * newScale;
+        currentY = centerY - uy * newScale;
+        currentScale = newScale;
+        container.style.transform = `translate(${currentX}px,${currentY}px) scale(${currentScale})`;
+    }
+}
+container.addEventListener('click', e => {
+    if (e.target.closest('a') || isDragging) return;
+    let next = currentZoomState + 1;
+    if (next > 2) next = 0;
+    setZoomState(next, e.clientX, e.clientY);
+});
+window.setZoomStateUI = function(state, event){
+    if (event) event.stopPropagation();
+    document.getElementById('loupe').classList.remove('visible');
+    setZoomState(state, null, null);
+};
+
+function startDrag(x,y){ if (currentZoomState === 0) return; isDragging = true; startX=x; startY=y; initialX=currentX; initialY=currentY; container.style.transition='none'; }
+function doDrag(x,y){ if(!isDragging) return; currentX = initialX + (x-startX); currentY = initialY + (y-startY); container.style.transform = `translate(${currentX}px,${currentY}px) scale(${currentScale})`; }
+function endDrag(){ if(!isDragging) return; setTimeout(()=>isDragging=false,50); container.style.transition='transform .4s cubic-bezier(.25,1,.5,1)'; }
+
+container.addEventListener('mousedown', e => { if (e.target.closest('.sponsor-tooltip')) return; startDrag(e.clientX,e.clientY); });
+window.addEventListener('mousemove', e => doDrag(e.clientX,e.clientY));
+window.addEventListener('mouseup', endDrag);
+container.addEventListener('touchstart', e => { if (e.target.closest('.sponsor-tooltip')) return; startDrag(e.touches[0].clientX,e.touches[0].clientY); });
+window.addEventListener('touchmove', e => { if (currentZoomState > 0) e.preventDefault(); doDrag(e.touches[0].clientX,e.touches[0].clientY); }, {passive:false});
+window.addEventListener('touchend', endDrag);
+
+/* ---------- LUPA ---------- */
+const loupe = document.getElementById('loupe'), loupeInner = document.getElementById('loupe-inner');
+const loupeSize = 260, loupeMultiplier = 1.6;
+function syncLoupe(){ loupeInner.innerHTML = container.innerHTML; }
+window.addEventListener('pointermove', e => {
+    if (e.target.closest('.sponsor-zone') || window.innerWidth < 768 || e.pointerType === 'touch' || currentZoomState > 0 || isDragging){
+        loupe.classList.remove('visible'); return;
+    }
+    const rect = container.getBoundingClientRect();
+    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom){
+        loupe.classList.remove('visible'); return;
+    }
+    loupe.classList.add('visible');
+    loupe.style.transform = `translate(${e.clientX - loupeSize/2}px,${e.clientY - loupeSize/2}px)`;
+    loupeInner.style.width = mapImg.naturalWidth + 'px';
+    loupeInner.style.height = mapImg.naturalHeight + 'px';
+    const tz = baseScale * loupeMultiplier;
+    const tx = (loupeSize/2) - ((e.clientX - currentX)/baseScale * tz);
+    const ty = (loupeSize/2) - ((e.clientY - currentY)/baseScale * tz);
+    loupeInner.style.transform = `translate(${tx}px,${ty}px) scale(${tz})`;
+});
+
+setInterval(sincronizarConExcel, C.csvRefreshMs);
+</script>
+</body>
+</html>
