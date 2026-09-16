@@ -123,3 +123,17 @@ color de la etiqueta (rosa collector, verde commercial, ámbar artist valley) y 
 
 `COMICS-M-25..36` y `COMICS-M-37..48` son Artist Valley en el plano. Están como collector en tono claro.
 Si necesitan tipo y precio propios, se añade una entrada en `types` de `config.js`.
+
+## Mesas de esquina
+
+Las mesas que hacen esquina se contratan por parejas: una mesa horizontal y
+una vertical de la misma isla que se tocan por un extremo. Al pasar el ratón
+por una de las dos se iluminan las dos, el tooltip muestra los dos números
+(`K50 + K51`) y el precio ya viene multiplicado por dos. Si una de las dos
+está vendida, la pareja entera sale como `SOLD OUT`.
+
+La detección está en `config.js`, en `C.corner`, y se calcula sobre la
+geometría real de `mesas.html` al cargar. Si se redibuja un plano no hay que
+tocar nada: las parejas se recalculan solas. La tolerancia (`C.corner.tol`,
+0.14 % del plano) es menor que el ancho de una mesa y mayor que el hueco
+entre dos mesas contiguas.
