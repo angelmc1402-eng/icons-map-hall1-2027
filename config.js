@@ -54,6 +54,62 @@ window.ICONS_CONFIG = {
         { key: 'dark',  label: 'Oscuro' }
     ],
 
+    /* STANDS · huecos verdes del plano (relleno #8BEDC3, borde #00857C), en px del PNG.
+       Los usa builder-sellers.html para crear sellers encajados al milímetro, y el mapa
+       público para el redondeo del logo. Si cambia el PNG, se regeneran con el script de detección.
+       r = radio de esquina en px del plano. */
+    stands: {
+        imageW: 7499, imageH: 5675,
+        freeRadius: 14,
+        list: [
+            { id:'S01', group:'Stands · fila superior', x:1947, y:841, w:354, h:337, r:27 },
+            { id:'S02', group:'Stands · fila superior', x:2314, y:841, w:355, h:337, r:27 },
+            { id:'S03', group:'Stands · fila superior', x:2682, y:841, w:355, h:337, r:27 },
+            { id:'S04', group:'Stands · fila superior', x:3050, y:841, w:354, h:337, r:27 },
+            { id:'S05', group:'Stands · zona central', x:1949, y:2720, w:232, h:381, r:27 },
+            { id:'S06', group:'Stands · zona central', x:2378, y:2720, w:232, h:381, r:27 },
+            { id:'S07', group:'Stands · zona central', x:2807, y:2720, w:232, h:381, r:27 },
+            { id:'S08', group:'Stands · zona central', x:3236, y:2720, w:232, h:381, r:27 },
+            { id:'S09', group:'Stands · zona central', x:3665, y:2720, w:232, h:381, r:27 },
+            { id:'S10', group:'Stands · zona central', x:4094, y:2720, w:232, h:381, r:27 },
+            { id:'S11', group:'Stands · zona central', x:4523, y:2720, w:232, h:381, r:27 },
+            { id:'S12', group:'Stands · zona central', x:4952, y:2720, w:232, h:381, r:27 },
+            { id:'S13', group:'Stands · zona central', x:5381, y:2720, w:232, h:381, r:27 },
+            { id:'S14', group:'Stands · zona central', x:5849, y:2722, w:233, h:381, r:27 },
+            { id:'S15', group:'Stands Diecast', x:619, y:3354, w:355, h:337, r:27 },
+            { id:'S16', group:'Stands Diecast', x:987, y:3354, w:355, h:337, r:27 },
+            { id:'S17', group:'Stands Diecast', x:1355, y:3354, w:354, h:337, r:27 },
+            { id:'S18', group:'Stands · zona central', x:1949, y:3341, w:232, h:381, r:27 },
+            { id:'S19', group:'Stands · zona central', x:2378, y:3341, w:232, h:381, r:27 },
+            { id:'S20', group:'Stands · zona central', x:2807, y:3341, w:232, h:381, r:27 },
+            { id:'S21', group:'Stands · zona central', x:3236, y:3341, w:232, h:381, r:27 },
+            { id:'S22', group:'Stands · zona central', x:3665, y:3341, w:232, h:381, r:27 },
+            { id:'S23', group:'Stands · zona central', x:4094, y:3341, w:232, h:381, r:27 },
+            { id:'S24', group:'Stands · zona central', x:4523, y:3341, w:232, h:381, r:27 },
+            { id:'S25', group:'Stands · zona central', x:4952, y:3341, w:232, h:381, r:27 },
+            { id:'S26', group:'Stands · zona central', x:5381, y:3341, w:232, h:381, r:27 },
+            { id:'S27', group:'Stands · zona central', x:5859, y:3340, w:764, h:232, r:27 },
+            { id:'S28', group:'Stands · pasillo inferior', x:1491, y:4034, w:154, h:146, r:17 },
+            { id:'S29', group:'Stands · pasillo inferior', x:1656, y:4034, w:154, h:146, r:17 },
+            { id:'S30', group:'Stands · pasillo inferior', x:1821, y:4034, w:154, h:146, r:17 },
+            { id:'S31', group:'Stands · pasillo inferior', x:1986, y:4034, w:154, h:146, r:17 },
+            { id:'S32', group:'Stands · pasillo inferior', x:2151, y:4034, w:154, h:146, r:17 },
+            { id:'S33', group:'Stands · pasillo inferior', x:2316, y:4034, w:154, h:145, r:17 },
+            { id:'S34', group:'Stands · pasillo inferior', x:2891, y:4034, w:153, h:146, r:17 },
+            { id:'S35', group:'Stands · pasillo inferior', x:3056, y:4034, w:153, h:146, r:17 },
+            { id:'S36', group:'Stands · pasillo inferior', x:3221, y:4034, w:153, h:146, r:17 },
+            { id:'S37', group:'Stands · pasillo inferior', x:3386, y:4034, w:153, h:145, r:17 },
+            { id:'S38', group:'Stands · pasillo inferior', x:3551, y:4034, w:153, h:145, r:17 },
+            { id:'S39', group:'Stands · pasillo inferior', x:3716, y:4034, w:153, h:146, r:17 },
+            { id:'S40', group:'Stands · pasillo inferior', x:4092, y:4034, w:153, h:145, r:17 },
+            { id:'S41', group:'Stands · pasillo inferior', x:4257, y:4034, w:153, h:145, r:17 },
+            { id:'S42', group:'Stands · pasillo inferior', x:4422, y:4034, w:153, h:146, r:17 },
+            { id:'S43', group:'Stands · pasillo inferior', x:5031, y:4034, w:153, h:146, r:17 },
+            { id:'S44', group:'Stands · pasillo inferior', x:5196, y:4034, w:153, h:146, r:17 },
+            { id:'S45', group:'Stands · pasillo inferior', x:5361, y:4034, w:153, h:145, r:17 }
+        ]
+    },
+
     /* medidas del builder, en % del plano. Mesa real de HALL 1: 85x25 px sobre 7499x5675 */
     defaults: {
         horizontal: { w: 1.1335, h: 0.4405 },
@@ -99,6 +155,59 @@ window.ICONS_CONFIG = {
         g = Math.max(0, Math.min(255, Math.round(g * (1 - amount))));
         b = Math.max(0, Math.min(255, Math.round(b * (1 - amount))));
         return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+    };
+
+    /* ---- STANDS (huecos verdes) ------------------------------------ */
+    /* slot en px del plano -> caja en % del plano + radio en % de la propia caja */
+    C.standBox = function (s) {
+        const W = C.stands.imageW, H = C.stands.imageH;
+        return { id: s.id, group: s.group, r: s.r,
+                 l: s.x / W * 100, t: s.y / H * 100, w: s.w / W * 100, h: s.h / H * 100 };
+    };
+    C.standById = function (id) {
+        const s = ((C.stands && C.stands.list) || []).find(function (x) { return x.id === id; });
+        return s ? C.standBox(s) : null;
+    };
+    /* stand cuyo marco contiene el punto (x, y en % del plano) */
+    C.standAt = function (x, y) {
+        const l = (C.stands && C.stands.list) || [];
+        for (let i = 0; i < l.length; i++) {
+            const b = C.standBox(l[i]);
+            if (x >= b.l && x <= b.l + b.w && y >= b.t && y <= b.t + b.h) return b;
+        }
+        return null;
+    };
+    /* border-radius CSS para una caja de wPct x hPct (% del plano) con radio rPx (px del plano).
+       En % de la propia caja, así escala con el zoom y nunca se sale del marco. */
+    C.radiusCss = function (wPct, hPct, rPx) {
+        const W = (C.stands && C.stands.imageW) || 1, H = (C.stands && C.stands.imageH) || 1;
+        const wpx = wPct / 100 * W, hpx = hPct / 100 * H;
+        if (!(wpx > 0 && hpx > 0)) return '';
+        const r = Math.min(rPx, wpx / 2, hpx / 2);
+        return (r / wpx * 100).toFixed(3) + '% / ' + (r / hpx * 100).toFixed(3) + '%';
+    };
+
+    /* encaja un .sponsor-zone del mapa público: si trae data-slot (o cae dentro de un
+       stand verde con tamaño parecido) toma la geometría exacta del stand, y le pone el
+       mismo redondeo. Devuelve false si el seller no tiene ni nombre ni logo (no se pinta). */
+    C.fitSeller = function (el) {
+        if (!(el.dataset.name || '').trim() && !(el.dataset.logo || '').trim()) return false;
+        const p = function (v) { return parseFloat(String(v || '').replace('%', '')) || 0; };
+        let w = p(el.style.width), h = p(el.style.height);
+        let b = el.dataset.slot ? C.standById(el.dataset.slot) : null;
+        if (!b && C.stands) {
+            const c = C.standAt(p(el.style.left) + w / 2, p(el.style.top) + h / 2);
+            if (c && (w * h) / (c.w * c.h) >= 0.4) b = c;
+        }
+        let r = parseFloat(el.dataset.r) || (C.stands && C.stands.freeRadius) || 14;
+        if (b) {
+            el.style.left = b.l + '%'; el.style.top = b.t + '%';
+            el.style.width = b.w + '%'; el.style.height = b.h + '%';
+            w = b.w; h = b.h; r = b.r;
+        }
+        const css = C.radiusCss(w, h, r);
+        if (css) el.style.borderRadius = css;
+        return true;
     };
 
     /* "DIECAST-A-1" -> "DIECAST-A" */

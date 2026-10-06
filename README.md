@@ -137,3 +137,20 @@ geometría real de `mesas.html` al cargar. Si se redibuja un plano no hay que
 tocar nada: las parejas se recalculan solas. La tolerancia (`C.corner.tol`,
 0.14 % del plano) es menor que el ancho de una mesa y mayor que el hueco
 entre dos mesas contiguas.
+
+## Stands verdes y Sellers Builder
+
+`config.js` → `stands.list` tiene todos los huecos verdes del plano (relleno `#8BEDC3`, borde `#00857C`) en px
+del PNG, con su radio de esquina. Se sacaron con `detect-stands.py`; si cambia el plano, se regeneran.
+
+- **Builder**: los huecos salen marcados con línea discontinua. Clic en uno → se crea el seller ya encajado
+  (misma caja y mismo redondeo) y solo hay que poner nombre, logo, IG y web. Si un seller se arrastra y se
+  suelta encima de un stand libre, se encaja solo. «Encajar en stand» / «Soltar (libre)» en el panel derecho.
+- Un seller sin nombre ni logo **no se exporta** y no sale en el mapa.
+- `seller.html` lleva `data-slot` (id del stand) y `data-r` (radio en px). El mapa público toma la geometría
+  del stand desde `config.js`, así que siempre coincide con el marco verde.
+- **Mapa público**: el logo ocupa exactamente el marco verde; el hover no escala, se dibuja hacia dentro.
+  El tooltip del seller ya no lleva la etiqueta «Exhibitor».
+- **Invisible** (casilla en la ficha → `data-invisible="true"`): para marcas ya impresas en el plano. No pinta caja ni logo, solo la zona de hover y la ficha con IG y web.
+- «Nuevo seller libre» tiene tamaños predefinidos (uno por cada medida de stand del plano) para logos fuera
+  de los huecos.
